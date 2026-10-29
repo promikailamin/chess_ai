@@ -4,3 +4,6 @@ target/
 opencode-output.log
 .idea/
 *.iml
+
+__pycache__/
+*.pyc
