@@ -1,0 +1,6 @@
+target/
+*.class
+*_analysis.png
+opencode-output.log
+.idea/
+*.iml
