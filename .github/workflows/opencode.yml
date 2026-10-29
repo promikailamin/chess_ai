@@ -45,7 +45,7 @@ jobs:
           {
             "$schema": "https://opencode.ai/config.json",
             "permission": "allow",
-            "model": "opencode/deepseek-v4.1-flash-free"
+            "model": "opencode/nemotron-3.5-super-vl-free"
           }
           JSON
 
@@ -107,6 +107,6 @@ jobs:
           )"
 
           opencode run \
-              --model opencode/deepseek-v4.1-flash-free \
+              --model opencode/nemotron-3.5-super-vl-free \
               --auto \
               "$prompt" 2>&1 | tee opencode-output.log
