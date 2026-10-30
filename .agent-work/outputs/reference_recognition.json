@@ -1,0 +1,138 @@
+[
+  {
+    "pass": false,
+    "id": "19-54-31-538",
+    "theme": "woodland-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rbbnnbrr/nnbnbnbn/8/8/8/KkK1K1K1/BBBBBBBB/NnNBKbNn w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "19-55-03-334",
+    "theme": "rustic-3d",
+    "style": "rendered",
+    "expected": "rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1",
+    "actual": "Krqnrnn1/knnknPnq/n2nrrkK/2KkKkKq/RqQKQKQq/nQqQqKkn/kkKqQQnk/RQkNqQQq w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "19-55-18-000",
+    "theme": "wood-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "qKnqkRnR/qpRpRpBp/8/8/8/8/PPPPPPPP/RNBQKNKR w KQ - 0 1"
+  },
+  {
+    "pass": true,
+    "id": "20-02-09-026",
+    "theme": "walnut-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  },
+  {
+    "pass": true,
+    "id": "20-02-12-688",
+    "theme": "teal-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-15-954",
+    "theme": "classic-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNr w Qkq - 0 1"
+  },
+  {
+    "pass": true,
+    "id": "20-02-19-616",
+    "theme": "plaid-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-26-845",
+    "theme": "marble-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "npqkpnr1/ppppppp1/8/8/8/8/PPPPPPRp/NBQKBNR1 w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-34-601",
+    "theme": "denim-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rNbqkBnR/pppppppp/8/8/8/8/PPrBBPPP/RQrkKKKR w KQq - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-42-284",
+    "theme": "marble-bw-flat",
+    "style": "flat",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RkBQKBNr w Qkq - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-47-190",
+    "theme": "marble-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "bRqQ1nnn/8/8/8/q3qQqQ/QqQqQkQk/QQQQQKqQ/KKQQkRkK w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-53-590",
+    "theme": "denim-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rnqqqqPr/rQqQqQqR/RqQq1qQr/rQqQKQqR/RqQPkqQr/qQqkKkqk/RqRqRRRq/qKqKqKrk w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-56-786",
+    "theme": "ocean-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "nnnnnbbn/8/8/8/K1K1K1K1/bNbRbRRQ/KrQnKQRR/KKKQKkKK w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-02-59-897",
+    "theme": "plaid-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "nQqqnQqq/p5p1/8/8/KkKkKkKk/KkKkKkKk/QRRQQQQQ/nQNNKNkQ w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-03-02-796",
+    "theme": "wood-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "bbbbnpnn/bnnnnbnn/8/8/k7/KKKKKKKK/BBBBBBNB/NnNNNNNQ w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-03-05-802",
+    "theme": "mahogany-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "nRqqnnnr/8/P7/pP6/kQq5/RrQkbRbQ/rQkKqnQn/KKkKkKkK w - - 0 1"
+  },
+  {
+    "pass": false,
+    "id": "20-03-09-608",
+    "theme": "oak-3d",
+    "style": "rendered",
+    "expected": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "actual": "rbbnnbbb/nnnnnnbn/8/8/Q7/qkK5/QkRqpqKq/QNqpQRqR w - - 0 1"
+  }
+]

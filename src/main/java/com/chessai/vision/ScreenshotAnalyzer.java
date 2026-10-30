@@ -23,6 +23,15 @@ public final class ScreenshotAnalyzer {
         return classifier.recognize(image, detection);
     }
 
+    public static Recognition analyze(File file, BoardQuad quad) throws IOException {
+        RasterImage image = RasterImage.load(file);
+        Homography homography = Homography.fromQuad(quad);
+        BoardDetector.Detection detection =
+                new BoardDetector.Detection(quad, homography, 1.0, "manual");
+        PieceClassifier classifier = new PieceClassifier();
+        return classifier.recognize(image, detection);
+    }
+
     public static void saveOverlay(File source, File target, Recognition recognition, int bestMove)
             throws IOException {
         BufferedImage image = ImageIO.read(source);

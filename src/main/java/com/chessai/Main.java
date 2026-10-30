@@ -7,6 +7,7 @@ import com.chessai.engine.Search;
 import com.chessai.engine.SearchResult;
 import com.chessai.sim.SelfPlay;
 import com.chessai.sim.SimulatorFrame;
+import com.chessai.vision.BoardQuad;
 import com.chessai.vision.Recognition;
 import com.chessai.vision.ScreenshotAnalyzer;
 
@@ -49,7 +50,7 @@ public final class Main {
                 Chess AI - screenshot recognition + Java chess engine
 
                 Usage:
-                  analyze <screenshot> [--depth N] [--time MS] [--fen FEN] [--no-overlay]
+                  analyze <screenshot> [--depth N] [--time MS] [--fen FEN] [--quad x1,y1,x2,y2,x3,y3,x4,y4] [--no-search] [--no-overlay]
                   selfplay [--games N] [--depth N] [--time MS] [--max-plies N] [--random-openings] [--quiet]
                   gui [--fen FEN]
                   perft [depth] [FEN]
@@ -75,12 +76,16 @@ public final class Main {
         int depth = 64;
         long time = 2000;
         String fenOverride = null;
+        BoardQuad quadOverride = null;
         boolean overlay = true;
+        boolean search = true;
         for (int i = 2; i < args.length; i++) {
             switch (args[i]) {
                 case "--depth" -> depth = Integer.parseInt(args[++i]);
                 case "--time" -> time = Long.parseLong(args[++i]);
                 case "--fen" -> fenOverride = args[++i];
+                case "--quad" -> quadOverride = parseQuad(args[++i]);
+                case "--no-search" -> search = false;
                 case "--no-overlay" -> overlay = false;
                 default -> {
                 }
@@ -88,7 +93,9 @@ public final class Main {
         }
 
         System.out.println("Image       : " + file.getAbsolutePath());
-        Recognition recognition = ScreenshotAnalyzer.analyze(file);
+        Recognition recognition = quadOverride == null
+                ? ScreenshotAnalyzer.analyze(file)
+                : ScreenshotAnalyzer.analyze(file, quadOverride);
         System.out.println("Board       : " + recognition.quad.describe()
                 + "  via " + recognition.method
                 + String.format("  (checkerboard %.3f)", recognition.boardScore));
@@ -104,16 +111,20 @@ public final class Main {
         }
         System.out.println("FEN         : " + position.toFen());
 
-        Search search = new Search(64);
-        SearchResult result = search.search(position, depth, time);
-        if (result.move == Move.NONE) {
-            System.out.println("Best move   : (none - position is already finished)");
-        } else {
-            System.out.println("Best move   : " + Move.toUci(result.move));
-            System.out.printf("Search      : score %+d  depth %d  nodes %d  time %d ms%n",
-                    result.score, result.depth, result.nodes, result.timeMillis);
-            if (Math.abs(result.score) > Search.MATE_THRESHOLD) {
-                System.out.println("              (forced mate detected)");
+        int bestMove = Move.NONE;
+        if (search) {
+            Search engine = new Search(64);
+            SearchResult result = engine.search(position, depth, time);
+            bestMove = result.move;
+            if (result.move == Move.NONE) {
+                System.out.println("Best move   : (none - position is already finished)");
+            } else {
+                System.out.println("Best move   : " + Move.toUci(result.move));
+                System.out.printf("Search      : score %+d  depth %d  nodes %d  time %d ms%n",
+                        result.score, result.depth, result.nodes, result.timeMillis);
+                if (Math.abs(result.score) > Search.MATE_THRESHOLD) {
+                    System.out.println("              (forced mate detected)");
+                }
             }
         }
 
@@ -122,9 +133,21 @@ public final class Main {
             int dot = name.lastIndexOf('.');
             String base = dot > 0 ? name.substring(0, dot) : name;
             File target = new File(file.getParentFile(), base + "_analysis.png");
-            ScreenshotAnalyzer.saveOverlay(file, target, recognition, result.move);
+            ScreenshotAnalyzer.saveOverlay(file, target, recognition, bestMove);
             System.out.println("Overlay     : " + target.getAbsolutePath());
         }
+    }
+
+    private static BoardQuad parseQuad(String value) {
+        String[] parts = value.split(",");
+        if (parts.length != 8) {
+            throw new IllegalArgumentException("--quad needs 8 comma-separated numbers");
+        }
+        double[] v = new double[8];
+        for (int i = 0; i < 8; i++) {
+            v[i] = Double.parseDouble(parts[i].trim());
+        }
+        return new BoardQuad(v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7]);
     }
 
     private static String boardAscii(char[][] squares) {

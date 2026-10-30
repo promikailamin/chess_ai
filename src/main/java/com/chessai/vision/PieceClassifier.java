@@ -5,10 +5,16 @@ import com.chessai.engine.Position;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Reads the 64 squares of a detected board and turns them into a position.
@@ -27,30 +33,41 @@ public final class PieceClassifier {
 
     private static final class Template {
         final int type;
-        final boolean flat;
-        final double[] values;
+        final int color;
         final boolean[] shape;
-        final int area;
+        final boolean learned;
+        final String theme;
+        final double crop;
 
-        Template(int type, boolean flat, double[] values) {
+        Template(int type, boolean[] shape) {
+            this(type, -1, shape, false, null, 1.0);
+        }
+
+        Template(int type, int color, boolean[] shape, boolean learned,
+                 String theme, double crop) {
             this.type = type;
-            this.flat = flat;
-            this.values = values;
-            boolean[] raw = new boolean[values.length];
-            int count = 0;
-            for (int i = 0; i < values.length; i++) {
-                raw[i] = values[i] > 0.45;
-                if (raw[i]) {
-                    count++;
-                }
-            }
-            this.area = count;
-            this.shape = normalizeShape(raw, NORMALIZED);
+            this.color = color;
+            this.shape = shape;
+            this.learned = learned;
+            this.theme = theme;
+            this.crop = crop;
+        }
+    }
+
+    private static final class Theme {
+        final String name;
+        final double crop;
+        final List<Template> templates = new ArrayList<>();
+
+        Theme(String name, double crop) {
+            this.name = name;
+            this.crop = crop;
         }
     }
 
     private static final class Match {
         int type;
+        int color = -1;
         double score;
         Template template;
         boolean flat;
@@ -59,15 +76,27 @@ public final class PieceClassifier {
     private static final class Cell {
         int[] rgb = new int[PATCH * PATCH];
         double[] lum = new double[PATCH * PATCH];
-        boolean[] mask = new boolean[PATCH * PATCH];
-        boolean[] flatMask = new boolean[NORMALIZED * NORMALIZED];
-        boolean[] normalizedMask = new boolean[NORMALIZED * NORMALIZED];
-        double[] edge = new double[NORMALIZED * NORMALIZED];
-        double occupancy;
         double backgroundLum;
+        final Map<Double, boolean[]> masks = new HashMap<>();
+        final Map<Double, boolean[]> shapes = new HashMap<>();
+        final Map<Double, Double> occupancies = new HashMap<>();
+
+        boolean[] mask(double crop) {
+            return masks.computeIfAbsent(crop, key -> new boolean[PATCH * PATCH]);
+        }
+
+        boolean[] shape(double crop) {
+            return shapes.get(crop);
+        }
+
+        double occupancy(double crop) {
+            Double value = occupancies.get(crop);
+            return value == null ? 0 : value;
+        }
     }
 
     private final List<Template> templates = new ArrayList<>();
+    private final Map<String, Theme> themes = new LinkedHashMap<>();
 
     public PieceClassifier() {
         loadTemplates();
@@ -80,6 +109,77 @@ public final class PieceClassifier {
             if (!flatOnly) {
                 loadTemplate(type, false, "/templates/3d/" + TYPE_NAMES[type] + ".png");
             }
+        }
+        if (!Boolean.getBoolean("chessai.classifier.noLearned")) {
+            loadLearnedTemplates();
+        }
+    }
+
+    private void loadLearnedTemplates() {
+        String manifest = "/templates/learned/manifest.csv";
+        try (InputStream stream = getClass().getResourceAsStream(manifest)) {
+            if (stream == null) {
+                return;
+            }
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(stream, StandardCharsets.UTF_8));
+            String line = reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split(",", -1);
+                if (parts.length < 9) {
+                    continue;
+                }
+                try {
+                    String themeName = parts[0].trim();
+                    int type = Integer.parseInt(parts[1].trim());
+                    int color = Integer.parseInt(parts[2].trim());
+                    double crop = Double.parseDouble(parts[4].trim());
+                    String resource = "/templates/learned/" + parts[8].trim();
+                    boolean[] shape = loadShape(resource);
+                    if (shape == null) {
+                        continue;
+                    }
+                    Theme theme = themes.computeIfAbsent(themeName,
+                            key -> new Theme(key, crop));
+                    theme.templates.add(new Template(type, color, shape, true,
+                            themeName, crop));
+                } catch (NumberFormatException ignored) {
+                    // Skip malformed manifest rows rather than disabling recognition.
+                }
+            }
+        } catch (IOException ignored) {
+            // Learned templates are optional; the built-in templates still work.
+        }
+    }
+
+    private boolean[] loadShape(String resource) {
+        try (InputStream stream = getClass().getResourceAsStream(resource)) {
+            if (stream == null) {
+                return null;
+            }
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                return null;
+            }
+            boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
+            for (int y = 0; y < NORMALIZED; y++) {
+                for (int x = 0; x < NORMALIZED; x++) {
+                    int sx = x * image.getWidth() / NORMALIZED;
+                    int sy = y * image.getHeight() / NORMALIZED;
+                    int rgb = image.getRGB(sx, sy);
+                    int r = (rgb >>> 16) & 0xff;
+                    int g = (rgb >>> 8) & 0xff;
+                    int b = rgb & 0xff;
+                    raw[y * NORMALIZED + x] = (0.299 * r + 0.587 * g + 0.114 * b) > 127;
+                }
+            }
+            return normalizeShape(raw, NORMALIZED);
+        } catch (IOException ignored) {
+            return null;
         }
     }
 
@@ -104,48 +204,143 @@ public final class PieceClassifier {
                     values[y * NORMALIZED + x] = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0;
                 }
             }
-            templates.add(new Template(type, flat, values));
+            boolean[] raw = new boolean[values.length];
+            for (int i = 0; i < values.length; i++) {
+                raw[i] = values[i] > 0.45;
+            }
+            templates.add(new Template(type, normalizeShape(raw, NORMALIZED)));
         } catch (IOException ignored) {
             // A missing optional template should not stop recognition.
         }
     }
 
     public Recognition recognize(RasterImage image, BoardDetector.Detection detection) {
+        Cell[] cells = new Cell[64];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                cells[row * 8 + col] = extractRaw(image, detection.unitToImage, row, col);
+            }
+        }
+        int[][] backgrounds = estimateBackgrounds(cells);
+        List<Double> crops = new ArrayList<>();
+        for (Theme theme : themes.values()) {
+            if (!crops.contains(theme.crop)) {
+                crops.add(theme.crop);
+            }
+        }
+        if (crops.isEmpty()) {
+            crops.add(1.0);
+        }
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                Cell cell = cells[row * 8 + col];
+                int parity = (row + col) & 1;
+                for (double crop : crops) {
+                    prepareCell(cell, backgrounds, parity, crop);
+                }
+            }
+        }
+
         int[] board = new int[64];
         char[][] chars = new char[8][8];
         double confidenceSum = 0;
         int occupied = 0;
+        String chosenTheme = "built-in";
 
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                Cell cell = extract(image, detection.unitToImage, row, col);
+        if (!themes.isEmpty()) {
+            Theme bestTheme = null;
+            double bestScore = -1;
+            Match[] bestMatches = null;
+            for (Theme theme : themes.values()) {
+                Match[] matches = new Match[64];
+                double total = 0;
+                int count = 0;
+                for (int index = 0; index < 64; index++) {
+                    Cell cell = cells[index];
+                    if (cell.occupancy(theme.crop) < 0.014) {
+                        continue;
+                    }
+                    Match match = classifyType(cell, theme.crop, theme.templates);
+                    if (match == null) {
+                        continue;
+                    }
+                    matches[index] = match;
+                    total += match.score;
+                    count++;
+                }
+                double score = count == 0 ? 0 : total / count;
                 if (Boolean.getBoolean("chessai.debug")) {
-                    Match debugMatch = classifyType(cell);
-                    System.out.printf("cell r%d c%d occ=%.3f bg=%.1f match=%s score=%.3f%n",
-                            row, col, cell.occupancy, cell.backgroundLum,
-                            debugMatch == null ? "-" : TYPE_NAMES[debugMatch.type],
-                            debugMatch == null ? 0 : debugMatch.score);
+                    System.out.printf("theme-score %s=%.3f (%d cells)%n", theme.name, score, count);
                 }
-                int rank = 7 - row;
-                int square = rank * 8 + col;
-                if (cell.occupancy < 0.014) {
-                    board[square] = Piece.EMPTY;
-                    chars[row][col] = '.';
-                    continue;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestTheme = theme;
+                    bestMatches = matches;
                 }
-                Match match = classifyType(cell);
-                if (match == null || match.score < 0.33) {
-                    board[square] = Piece.EMPTY;
-                    chars[row][col] = '.';
-                    continue;
-                }
-                boolean white = isWhite(cell, match);
-                int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.type);
-                board[square] = piece;
-                chars[row][col] = Piece.toChar(piece);
-                confidenceSum += match.score;
-                occupied++;
             }
+            if (bestTheme != null && bestMatches != null) {
+                chosenTheme = bestTheme.name;
+                for (int index = 0; index < 64; index++) {
+                    int row = index / 8;
+                    int col = index % 8;
+                    int rank = 7 - row;
+                    int square = rank * 8 + col;
+                    Cell cell = cells[index];
+                    Match match = bestMatches[index];
+                    if (Boolean.getBoolean("chessai.debug")) {
+                        System.out.printf("cell r%d c%d occ=%.3f match=%s score=%.3f%n",
+                                row, col, cell.occupancy(bestTheme.crop),
+                                match == null ? "-" : TYPE_NAMES[match.type],
+                                match == null ? 0 : match.score);
+                    }
+                    if (cell.occupancy(bestTheme.crop) < 0.014
+                            || match == null || match.score < 0.33) {
+                        board[square] = Piece.EMPTY;
+                        chars[row][col] = '.';
+                        continue;
+                    }
+                    boolean white = match.color >= 0
+                            ? match.color == 0
+                            : isWhite(cell, bestTheme.crop);
+                    int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.type);
+                    board[square] = piece;
+                    chars[row][col] = Piece.toChar(piece);
+                    confidenceSum += match.score;
+                    occupied++;
+                }
+            }
+        } else {
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
+                    int index = row * 8 + col;
+                    Cell cell = cells[index];
+                    int rank = 7 - row;
+                    int square = rank * 8 + col;
+                    if (cell.occupancy(1.0) < 0.014) {
+                        board[square] = Piece.EMPTY;
+                        chars[row][col] = '.';
+                        continue;
+                    }
+                    Match match = classifyType(cell, 1.0, templates);
+                    if (match == null || match.score < 0.33) {
+                        board[square] = Piece.EMPTY;
+                        chars[row][col] = '.';
+                        continue;
+                    }
+                    boolean white = match.color >= 0
+                            ? match.color == 0
+                            : isWhite(cell, 1.0);
+                    int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.type);
+                    board[square] = piece;
+                    chars[row][col] = Piece.toChar(piece);
+                    confidenceSum += match.score;
+                    occupied++;
+                }
+            }
+        }
+
+        if (Boolean.getBoolean("chessai.debug")) {
+            System.out.println("theme=" + chosenTheme);
         }
 
         Position position = Position.fromFen("8/8/8/8/8/8/8/8 w - - 0 1");
@@ -220,7 +415,7 @@ public final class PieceClassifier {
         }
     }
 
-    private Cell extract(RasterImage image, Homography homography, int row, int col) {
+    private Cell extractRaw(RasterImage image, Homography homography, int row, int col) {
         Cell cell = new Cell();
         for (int y = 0; y < PATCH; y++) {
             for (int x = 0; x < PATCH; x++) {
@@ -233,52 +428,79 @@ public final class PieceClassifier {
                 cell.lum[index] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
             }
         }
+        return cell;
+    }
 
-        int margin = 6;
-        int span = PATCH - margin * 2;
-        double[] borderR = new double[span * span];
-        double[] borderG = new double[span * span];
-        double[] borderB = new double[span * span];
-        int borderIndex = 0;
-        for (int y = margin; y < PATCH - margin; y++) {
-            for (int x = margin; x < PATCH - margin; x++) {
-                int rgb = cell.rgb[y * PATCH + x];
-                borderR[borderIndex] = (rgb >>> 16) & 0xff;
-                borderG[borderIndex] = (rgb >>> 8) & 0xff;
-                borderB[borderIndex] = rgb & 0xff;
-                borderIndex++;
+    private int[][] estimateBackgrounds(Cell[] cells) {
+        int[][][] r = new int[2][PATCH * PATCH][32];
+        int[][][] g = new int[2][PATCH * PATCH][32];
+        int[][][] b = new int[2][PATCH * PATCH][32];
+        int[] counts = new int[2];
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                int parity = (row + col) & 1;
+                int slot = counts[parity]++;
+                Cell cell = cells[row * 8 + col];
+                for (int i = 0; i < PATCH * PATCH; i++) {
+                    int rgb = cell.rgb[i];
+                    r[parity][i][slot] = (rgb >>> 16) & 0xff;
+                    g[parity][i][slot] = (rgb >>> 8) & 0xff;
+                    b[parity][i][slot] = rgb & 0xff;
+                }
             }
         }
-        double bgR = median(borderR);
-        double bgG = median(borderG);
-        double bgB = median(borderB);
-        cell.backgroundLum = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
+        int[][] backgrounds = new int[2][PATCH * PATCH];
+        for (int parity = 0; parity < 2; parity++) {
+            int count = Math.max(1, counts[parity]);
+            for (int i = 0; i < PATCH * PATCH; i++) {
+                int rr = median(r[parity][i], count);
+                int gg = median(g[parity][i], count);
+                int bb = median(b[parity][i], count);
+                backgrounds[parity][i] = (rr << 16) | (gg << 8) | bb;
+            }
+        }
+        return backgrounds;
+    }
 
+    private int median(int[] values, int count) {
+        int[] copy = java.util.Arrays.copyOf(values, count);
+        java.util.Arrays.sort(copy);
+        return copy[count / 2];
+    }
+
+    private void prepareCell(Cell cell, int[][] backgrounds, int parity, double crop) {
+        int cutoff = Math.max(1, Math.min(PATCH, (int) Math.round(crop * PATCH)));
         boolean[] mask = new boolean[PATCH * PATCH];
-        for (int y = 4; y < PATCH - 4; y++) {
+        for (int y = 4; y < cutoff - 4; y++) {
             for (int x = 4; x < PATCH - 4; x++) {
                 int index = y * PATCH + x;
                 int rgb = cell.rgb[index];
                 int r = (rgb >>> 16) & 0xff;
                 int g = (rgb >>> 8) & 0xff;
                 int b = rgb & 0xff;
-                double distance = Math.max(Math.abs(r - bgR),
+                int bg = backgrounds[parity][index];
+                int bgR = (bg >>> 16) & 0xff;
+                int bgG = (bg >>> 8) & 0xff;
+                int bgB = bg & 0xff;
+                int distance = Math.max(Math.abs(r - bgR),
                         Math.max(Math.abs(g - bgG), Math.abs(b - bgB)));
-                double lumShift = Math.abs(cell.lum[index] - cell.backgroundLum);
-                mask[index] = distance > 30 || lumShift > 34;
+                double bgLum = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
+                int lumShift = (int) Math.round(Math.abs(cell.lum[index] - bgLum));
+                mask[index] = distance > 26 || lumShift > 30;
             }
         }
         mask = openClose(mask);
-        mask = largestComponent(mask);
-        cell.mask = mask;
+        mask = largestComponent(mask, cutoff);
+        cell.masks.put(crop, mask);
         int area = 0;
         for (boolean value : mask) {
             if (value) {
                 area++;
             }
         }
-        cell.occupancy = area / (double) (PATCH * PATCH);
+        cell.occupancies.put(crop, area / (double) (PATCH * PATCH));
 
+        boolean[] flatMask = new boolean[NORMALIZED * NORMALIZED];
         for (int y = 0; y < NORMALIZED; y++) {
             for (int x = 0; x < NORMALIZED; x++) {
                 int count = 0;
@@ -289,54 +511,43 @@ public final class PieceClassifier {
                         }
                     }
                 }
-                cell.flatMask[y * NORMALIZED + x] = count >= 2;
+                flatMask[y * NORMALIZED + x] = count >= 2;
             }
         }
-        cell.normalizedMask = normalizeShape(cell.flatMask, NORMALIZED);
-        cell.edge = edgeMap(cell.lum);
-        return cell;
+        cell.shapes.put(crop, normalizeShape(flatMask, NORMALIZED));
     }
 
-    private Match classifyType(Cell cell) {
+    private Match classifyType(Cell cell, double crop, List<Template> candidates) {
         Match best = null;
-        if (Boolean.getBoolean("chessai.debug.classify")) {
-            StringBuilder sb = new StringBuilder("scores:");
-            for (Template template : templates) {
-                if (template.flat) {
-                    sb.append(' ').append(TYPE_NAMES[template.type]).append('=')
-                            .append(String.format("%.3f", dice(cell.normalizedMask, template.shape)));
-                }
-            }
-            System.out.println(sb);
+        boolean[] shape = cell.shape(crop);
+        if (shape == null) {
+            return null;
         }
-        for (Template template : templates) {
-            double score;
-            if (template.flat) {
-                score = dice(cell.normalizedMask, template.shape);
-                if (template.type == Piece.KNIGHT) {
-                    score = Math.max(score, dice(mirror(cell.normalizedMask), template.shape));
-                }
-            } else {
-                score = correlation(cell.edge, template.values) * 0.92;
+        for (Template template : candidates) {
+            double score = dice(shape, template.shape);
+            if (template.type == Piece.KNIGHT) {
+                score = Math.max(score, dice(mirror(shape), template.shape));
             }
             if (best == null || score > best.score) {
                 best = new Match();
                 best.type = template.type;
                 best.score = score;
                 best.template = template;
-                best.flat = template.flat;
+                best.flat = template.learned;
+                best.color = template.color;
             }
         }
         return best;
     }
 
-    private boolean isWhite(Cell cell, Match match) {
+    private boolean isWhite(Cell cell, double crop) {
+        boolean[] mask = cell.mask(crop);
         double bright = 0;
         double dark = 0;
         double sum = 0;
         int count = 0;
-        for (int i = 0; i < cell.mask.length; i++) {
-            if (!cell.mask[i]) {
+        for (int i = 0; i < mask.length; i++) {
+            if (!mask[i]) {
                 continue;
             }
             double value = cell.lum[i];
@@ -499,12 +710,14 @@ public final class PieceClassifier {
         return out;
     }
 
-    private boolean[] largestComponent(boolean[] mask) {
+    private boolean[] largestComponent(boolean[] mask, int cutoff) {
         int[] labels = new int[mask.length];
         java.util.Arrays.fill(labels, -1);
         int[] queue = new int[mask.length];
         int bestLabel = -1;
         double bestScore = -1;
+        int edgeLabel = -1;
+        double edgeScore = -1;
         int label = 0;
         double center = PATCH / 2.0;
         for (int start = 0; start < mask.length; start++) {
@@ -551,24 +764,33 @@ public final class PieceClassifier {
                     }
                 }
             }
-            boolean touchesEdge = minX <= 1 || minY <= 1 || maxX >= PATCH - 2 || maxY >= PATCH - 2;
-            if (area >= 60 && !touchesEdge) {
+            boolean touchesEdge = minX <= 1 || minY <= 1 || maxX >= PATCH - 2;
+            if (area >= 60) {
                 double cx = sumX / area;
                 double cy = sumY / area;
                 double score = area / (1.0 + ((cx - center) * (cx - center)
                         + (cy - center) * (cy - center)) / 250.0);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestLabel = label;
+                if (!touchesEdge) {
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestLabel = label;
+                    }
+                } else if (score > edgeScore) {
+                    edgeScore = score;
+                    edgeLabel = label;
                 }
             }
             label++;
         }
+        if (bestLabel < 0) {
+            bestLabel = edgeLabel;
+        }
+        if (bestLabel < 0) {
+            return mask.clone();
+        }
         boolean[] out = new boolean[mask.length];
-        if (bestLabel >= 0) {
-            for (int i = 0; i < mask.length; i++) {
-                out[i] = labels[i] == bestLabel;
-            }
+        for (int i = 0; i < mask.length; i++) {
+            out[i] = labels[i] == bestLabel;
         }
         return out;
     }

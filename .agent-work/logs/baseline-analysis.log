@@ -1,0 +1,238 @@
+===== Screenshot_2026-10-29-19-54-31-538_com.llx.chess.jpg
+Board       : (753,55) -> (1755,53) -> (1916,1040) -> (597,1038)  via hough  (checkerboard 0.515)
+Confidence  : 0.782
+Recognized board:
+8  q q Q n Q b q b 
+7  n Q b Q n Q b Q 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  K . K . K . K . 
+2  B B B B B B B B 
+1  N r N N B b N n 
+FEN         : qqQnQbqb/nQbQnQbQ/8/8/8/KkK1K1K1/BBBBBBBB/NrNNBbNn w - - 0 1
+Best move   : a1b3
+===== Screenshot_2026-10-29-19-55-03-334_com.llx.chess.jpg
+Board       : (766,101) -> (1742,70) -> (1933,927) -> (558,975)  via hough-grid  (checkerboard 0.422)
+Confidence  : 0.695
+Recognized board:
+8  K r k n b n r . 
+7  k Q n k n R r q 
+6  Q . . n q r k K 
+5  . . K k K k K q 
+4  . q Q K Q K k q 
+3  Q r R Q K q k k 
+2  r R r R k Q Q r 
+1  R q Q Q Q Q r Q 
+FEN         : Krknbnr1/kQnknRrq/Q2nqrkK/2KkKkKq/1qQKQKkq/QrRQKqkk/rRrRkQQr/RqQQQQrQ w - - 0 1
+Best move   : (none - position is already finished)
+===== Screenshot_2026-10-29-19-55-18-000_com.llx.chess.jpg
+Board       : (750,8) -> (1762,25) -> (1760,1071) -> (751,1045)  via hough-grid  (checkerboard 0.576)
+Confidence  : 0.742
+Recognized board:
+8  q K b Q k R q R 
+7  N r R r R p B p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R Q B Q Q R q R 
+FEN         : qKbQkRqR/NrRrRpBp/8/8/8/8/PPPPPPPP/RQBQQRqR w - - 0 1
+Best move   : b8a8
+===== Screenshot_2026-10-29-20-02-09-026_com.llx.chess.jpg
+Board       : (751,40) -> (1762,26) -> (1761,1045) -> (752,1042)  via hough-grid  (checkerboard 0.523)
+Confidence  : 0.867
+Recognized board:
+8  r n b q k b n r 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R N B Q K B N R 
+FEN         : rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Best move   : b1c3
+===== Screenshot_2026-10-29-20-02-12-688_com.llx.chess.jpg
+Board       : (749,34) -> (1758,35) -> (1758,1043) -> (749,1044)  via hough-grid  (checkerboard 0.652)
+Confidence  : 0.835
+Recognized board:
+8  r q b q k b n q 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R N B N K B N R 
+FEN         : rqbqkbnq/pppppppp/8/8/8/8/PPPPPPPP/RNBNKBNR w KQq - 0 1
+Best move   : b1c3
+===== Screenshot_2026-10-29-20-02-15-954_com.llx.chess.jpg
+Board       : (751,34) -> (1758,34) -> (1758,1043) -> (751,1043)  via hough-grid  (checkerboard 0.690)
+Confidence  : 0.794
+Recognized board:
+8  r q b q k b n q 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R K B K K r N R 
+FEN         : rqbqkbnq/pppppppp/8/8/8/8/PPPPPPPP/RKBKKrNR w KQq - 0 1
+Best move   : e1f1
+===== Screenshot_2026-10-29-20-02-19-616_com.llx.chess.jpg
+Board       : (751,34) -> (1758,34) -> (1758,1043) -> (751,1043)  via hough-grid  (checkerboard 0.585)
+Confidence  : 0.867
+Recognized board:
+8  r n b q k b n r 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R N B Q K B N R 
+FEN         : rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Best move   : b1c3
+===== Screenshot_2026-10-29-20-02-26-845_com.llx.chess.jpg
+Board       : (881,67) -> (1889,57) -> (1900,1033) -> (870,1026)  via hough  (checkerboard 0.459)
+Confidence  : 0.833
+Recognized board:
+8  q b n k n q r . 
+7  p p p p p p p . 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P . 
+1  Q B N K B N R . 
+FEN         : qbnknqr1/ppppppp1/8/8/8/8/PPPPPPP1/QBNKBNR1 w - - 0 1
+Best move   : c1d3
+===== Screenshot_2026-10-29-20-02-34-601_com.llx.chess.jpg
+Board       : (755,34) -> (1757,33) -> (1765,1060) -> (747,1048)  via hough-grid  (checkerboard 0.674)
+Confidence  : 0.732
+Recognized board:
+8  q N b Q K B Q R 
+7  P p R p P p R p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P r P q P P P 
+1  R Q r K K K q Q 
+FEN         : qNbQKBQR/PpRpPpRp/8/8/8/k7/PPrPqPPP/RQrKKKqQ w Q - 0 1
+Best move   : (none - position is already finished)
+===== Screenshot_2026-10-29-20-02-42-284_com.llx.chess.jpg
+Board       : (752,34) -> (1757,34) -> (1758,1043) -> (751,1043)  via hough-grid  (checkerboard 0.666)
+Confidence  : 0.727
+Recognized board:
+8  r q b q k B n q 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  p P p P p P p P 
+1  R k B n K r N r 
+FEN         : rqbqkBnq/pppppppp/8/8/8/8/pPpPpPpP/RkBnKrNr w Qq - 0 1
+Best move   : e1e2
+===== Screenshot_2026-10-29-20-02-47-190_com.llx.chess.jpg
+Board       : (723,169) -> (1785,158) -> (1872,1094) -> (641,1065)  via hough  (checkerboard 0.660)
+Confidence  : 0.759
+Recognized board:
+8  b R b Q b n n n 
+7  . . . . . . . . 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  R Q Q q K Q R Q 
+2  Q Q Q Q Q Q R Q 
+1  K Q K Q k K k K 
+FEN         : bRbQbnnn/8/8/8/8/RQQqKQRQ/QQQQQQRQ/KQKQkKkK w - - 0 1
+Best move   : d8d3
+===== Screenshot_2026-10-29-20-02-53-590_com.llx.chess.jpg
+Board       : (696,43) -> (1812,43) -> (1908,1048) -> (588,1048)  via guess  (checkerboard 0.709)
+Confidence  : 0.608
+Recognized board:
+8  r R R n Q N B k 
+7  p R P n b Q P Q 
+6  q . . . . . . Q 
+5  Q q . . K . . k 
+4  q R . R k K r R 
+3  R r P k K k K k 
+2  Q q R q R q Q q 
+1  q K q K q K q K 
+FEN         : rRRnQNBk/pRPnbQPQ/q6Q/Qq2K2k/qR1RkKrR/RrPkKkKk/QqRqRqQq/qKqKqKqK w - - 0 1
+Best move   : (none - position is already finished)
+===== Screenshot_2026-10-29-20-02-56-786_com.llx.chess.jpg
+Board       : (714,159) -> (1795,156) -> (1902,1103) -> (608,1100)  via hough-grid  (checkerboard 0.315)
+Confidence  : 0.704
+Recognized board:
+8  n R n n n n n R 
+7  . . . . . . . . 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  P P P B P B P B 
+2  R K K b K r q R 
+1  . K K . K K K K 
+FEN         : nRnnnnnR/8/8/8/8/PPPBPBPB/RKKbKrqR/kKK1KKKK w - - 0 1
+Best move   : a2a1
+===== Screenshot_2026-10-29-20-02-59-897_com.llx.chess.jpg
+Board       : (715,180) -> (1797,173) -> (1893,1037) -> (624,1028)  via hough  (checkerboard 0.533)
+Confidence  : 0.770
+Recognized board:
+8  r Q n q b Q n q 
+7  P . . . . . . . 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  K k K k K k K k 
+3  q k q k q k q k 
+2  R Q Q Q Q q k Q 
+1  N n N N N N K N 
+FEN         : rQnqbQnq/P7/8/8/KkKkKkKk/qkqkqkqk/RQQQQqkQ/NnNNNNKN w - - 0 1
+Best move   : (none - position is already finished)
+===== Screenshot_2026-10-29-20-03-02-796_com.llx.chess.jpg
+Board       : (751,60) -> (1755,59) -> (1921,1038) -> (590,1037)  via hough  (checkerboard 0.586)
+Confidence  : 0.733
+Recognized board:
+8  Q b Q b Q p r n 
+7  b Q n Q n Q n Q 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  K K K K K K K K 
+2  B B B B B B N B 
+1  N n N N N N N N 
+FEN         : QbQbQprn/bQnQnQnQ/8/8/k7/KKKKKKKK/BBBBBBNB/NnNNNNNN w - - 0 1
+Best move   : a3a4
+===== Screenshot_2026-10-29-20-03-05-802_com.llx.chess.jpg
+Board       : (726,171) -> (1792,145) -> (1903,1109) -> (698,1063)  via hough  (checkerboard 0.676)
+Confidence  : 0.741
+Recognized board:
+8  n q n q n n n r 
+7  . . . . . . . . 
+6  . . . . . . . . 
+5  p . . . . . . . 
+4  Q . . . . . . . 
+3  k Q q q b q b r 
+2  r R R r q k q r 
+1  k K k K k K k K 
+FEN         : nqnqnnnr/8/8/p7/Q7/kQqqbqbr/rRRrqkqr/kKkKkKkK w - - 0 1
+Best move   : b1c1
+===== Screenshot_2026-10-29-20-03-09-608_com.llx.chess.jpg
+Board       : (759,76) -> (1771,58) -> (1894,988) -> (653,948)  via hough  (checkerboard 0.533)
+Confidence  : 0.808
+Recognized board:
+8  q q q k R b q b 
+7  n Q n Q n Q b R 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . K . . . . . 
+2  Q K K q p q R R 
+1  Q Q Q Q Q Q R r 
+FEN         : qqqkRbqb/nQnQnQbR/8/8/8/2K5/QKKqpqRR/QQQQQQRr w - - 0 1
+Best move   : c1d2
