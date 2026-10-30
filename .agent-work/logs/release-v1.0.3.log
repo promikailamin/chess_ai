@@ -1,0 +1,12 @@
+Release: v1.0.3
+Name: Chess AI Bot v1.0.3 - continuous play fix
+URL: https://github.com/promikailamin/chess_ai/releases/tag/v1.0.3
+Commit: cfe235b02ab4b9b03cad11f60038eeb062df9e5f
+Workflow run: https://github.com/promikailamin/chess_ai/actions/runs/41002454559
+APK: chess-ai-android-v1.0.3-debug.apk
+SHA-256: b48f90939f4aacf0ab533e00429e1202dd38d283aead0168397d6522e98d5e20
+
+Validation:
+- mvn test: exit 0
+- ./gradlew :app:assembleDebug: BUILD SUCCESSFUL
+- GitHub Actions Build Android APK: success
