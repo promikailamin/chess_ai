@@ -1,0 +1,229 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag/version (for example v1.0.0). Leave empty to auto-generate v1.0.<run_number>."
+        required: false
+        default: ""
+        type: string
+      release_name:
+        description: "Release title. Leave empty to use the tag name."
+        required: false
+        default: ""
+        type: string
+      build_type:
+        description: "APK build type. Debug APKs are signed with the debug key and install directly."
+        required: true
+        default: debug
+        type: choice
+        options:
+          - debug
+          - release
+      prerelease:
+        description: "Mark the GitHub release as a pre-release."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Resolve release metadata
+        id: metadata
+        working-directory: ${{ github.workspace }}
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_RELEASE_NAME: ${{ inputs.release_name }}
+          INPUT_BUILD_TYPE: ${{ inputs.build_type }}
+        run: |
+          set -euo pipefail
+
+          version="${INPUT_VERSION:-}"
+          if [ -z "$version" ]; then
+            version="v1.0.${GITHUB_RUN_NUMBER}"
+          fi
+
+          # Keep the tag filesystem-safe while preserving normal semver tags.
+          safe_version="$(printf '%s' "$version" | tr '/' '-' | tr ' ' '-')"
+
+          release_name="${INPUT_RELEASE_NAME:-$version}"
+
+          build_type="${INPUT_BUILD_TYPE:-debug}"
+          case "$build_type" in
+            debug|release) ;;
+            *)
+              echo "::error::Unsupported build type: $build_type"
+              exit 1
+              ;;
+          esac
+          build_capitalized="$(printf '%s' "$build_type" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
+
+          apk_name="chess-ai-android-${safe_version}-${build_type}.apk"
+
+          {
+            echo "tag=$version"
+            echo "safe_version=$safe_version"
+            echo "release_name=$release_name"
+            echo "build_type=$build_type"
+            echo "build_capitalized=$build_capitalized"
+            echo "apk_name=$apk_name"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Building $build_type APK for $version"
+
+      - name: Build APK
+        env:
+          BUILD_TYPE: ${{ steps.metadata.outputs.build_type }}
+          BUILD_CAPITALIZED: ${{ steps.metadata.outputs.build_capitalized }}
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace ":app:assemble${BUILD_CAPITALIZED}"
+
+      - name: Prepare release artifacts
+        id: artifacts
+        env:
+          BUILD_TYPE: ${{ steps.metadata.outputs.build_type }}
+          APK_NAME: ${{ steps.metadata.outputs.apk_name }}
+        run: |
+          set -euo pipefail
+
+          case "$BUILD_TYPE" in
+            debug)
+              source_apk="app/build/outputs/apk/debug/app-debug.apk"
+              ;;
+            release)
+              source_apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+              if [ ! -f "$source_apk" ]; then
+                source_apk="app/build/outputs/apk/release/app-release.apk"
+              fi
+              ;;
+          esac
+
+          if [ ! -f "$source_apk" ]; then
+            echo "::error::Expected APK was not produced: $source_apk"
+            find app/build/outputs -maxdepth 4 -type f || true
+            exit 1
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp "$source_apk" "$GITHUB_WORKSPACE/dist/$APK_NAME"
+          (
+            cd "$GITHUB_WORKSPACE/dist"
+            sha256sum "$APK_NAME" > "$APK_NAME.sha256"
+          )
+
+          echo "apk_path=$GITHUB_WORKSPACE/dist/$APK_NAME" >> "$GITHUB_OUTPUT"
+          echo "checksum_path=$GITHUB_WORKSPACE/dist/$APK_NAME.sha256" >> "$GITHUB_OUTPUT"
+          ls -lh "$GITHUB_WORKSPACE/dist"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chess-ai-android-${{ steps.metadata.outputs.safe_version }}-${{ steps.metadata.outputs.build_type }}
+          path: |
+            ${{ steps.artifacts.outputs.apk_path }}
+            ${{ steps.artifacts.outputs.checksum_path }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create or update GitHub release
+        working-directory: ${{ github.workspace }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ steps.metadata.outputs.tag }}
+          RELEASE_NAME: ${{ steps.metadata.outputs.release_name }}
+          BUILD_TYPE: ${{ steps.metadata.outputs.build_type }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          APK_PATH: ${{ steps.artifacts.outputs.apk_path }}
+          CHECKSUM_PATH: ${{ steps.artifacts.outputs.checksum_path }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::The PAT_TOKEN secret is required to create a release."
+            exit 1
+          fi
+
+          notes_file="$RUNNER_TEMP/release-notes.md"
+          {
+            echo "Automated Android APK release built from \`${GITHUB_SHA}\`."
+            echo
+            echo "- Build type: \`${BUILD_TYPE}\`"
+            echo "- Workflow run: [#${GITHUB_RUN_NUMBER}](https://github.com/${REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo
+            echo "### Verification"
+            echo '```'
+            cat "$CHECKSUM_PATH"
+            echo '```'
+          } > "$notes_file"
+
+          release_args=(
+            --repo "$REPOSITORY"
+            --title "$RELEASE_NAME"
+            --notes-file "$notes_file"
+          )
+          if [ "${PRERELEASE:-false}" = "true" ]; then
+            release_args+=(--prerelease)
+          fi
+
+          if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; uploading updated APK."
+            gh release upload "$TAG" "$APK_PATH" "$CHECKSUM_PATH" --clobber --repo "$REPOSITORY"
+          else
+            if git rev-parse --verify --quiet "refs/tags/$TAG" >/dev/null; then
+              echo "Tag $TAG already exists; creating release for it."
+              gh release create "$TAG" "$APK_PATH" "$CHECKSUM_PATH" \
+                "${release_args[@]}" \
+                --verify-tag
+            else
+              echo "Creating release $TAG at $GITHUB_SHA."
+              gh release create "$TAG" "$APK_PATH" "$CHECKSUM_PATH" \
+                "${release_args[@]}" \
+                --target "$GITHUB_SHA"
+            fi
+          fi
+
+          echo "Release: https://github.com/${REPOSITORY}/releases/tag/${TAG}"

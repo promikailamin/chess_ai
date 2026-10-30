@@ -70,6 +70,13 @@ cd android
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
+To build and publish an APK from GitHub, run the **Build Android APK**
+workflow manually (Actions -> Build Android APK -> Run workflow). It builds the
+selected APK type, uploads it as a workflow artifact, and creates or updates a
+GitHub release with the APK and its SHA-256 checksum using the `PAT_TOKEN`
+secret. Leave the version input empty to generate a `v1.0.<run_number>` tag, or
+provide an explicit tag such as `v1.0.0`.
+
 1. Open **Chess AI Bot** and enable the accessibility service, then return to
    the app.
 2. Set the target package (default `com.llx.chess`) and open that chess app.
