@@ -1,10 +1,5 @@
 package com.chessai.vision;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 /** Simple ARGB raster used by the image-processing pipeline. */
 public final class RasterImage {
     private final int width;
@@ -15,23 +10,6 @@ public final class RasterImage {
         this.width = width;
         this.height = height;
         this.pixels = pixels;
-    }
-
-    public static RasterImage load(File file) throws IOException {
-        BufferedImage image = ImageIO.read(file);
-        if (image == null) {
-            throw new IOException("Unsupported image: " + file);
-        }
-        int w = image.getWidth();
-        int h = image.getHeight();
-        int[] pixels = image.getRGB(0, 0, w, h, null, 0, w);
-        return new RasterImage(w, h, pixels);
-    }
-
-    public static RasterImage fromBufferedImage(BufferedImage image) {
-        int w = image.getWidth();
-        int h = image.getHeight();
-        return new RasterImage(w, h, image.getRGB(0, 0, w, h, null, 0, w));
     }
 
     public int getWidth() {
@@ -136,9 +114,4 @@ public final class RasterImage {
         return new RasterImage(nw, nh, out);
     }
 
-    public BufferedImage toBufferedImage() {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        image.setRGB(0, 0, width, height, pixels, 0, width);
-        return image;
-    }
 }

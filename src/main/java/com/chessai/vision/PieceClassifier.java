@@ -3,13 +3,6 @@ package com.chessai.vision;
 import com.chessai.engine.Piece;
 import com.chessai.engine.Position;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -97,8 +90,20 @@ public final class PieceClassifier {
 
     private final List<Template> templates = new ArrayList<>();
     private final Map<String, Theme> themes = new LinkedHashMap<>();
+    private final TemplateSource source;
+    private final boolean useLearnedTemplates;
 
-    public PieceClassifier() {
+    public PieceClassifier(TemplateSource source) {
+        this(source, Boolean.getBoolean("chessai.classifier.learned"));
+    }
+
+    public PieceClassifier(TemplateSource source, boolean useLearnedTemplates) {
+        if (source == null) {
+            throw new IllegalArgumentException("Template source is required");
+        }
+        this.source = source;
+        this.useLearnedTemplates = useLearnedTemplates
+                && !Boolean.getBoolean("chessai.classifier.noLearned");
         loadTemplates();
     }
 
@@ -110,108 +115,76 @@ public final class PieceClassifier {
                 loadTemplate(type, false, "/templates/3d/" + TYPE_NAMES[type] + ".png");
             }
         }
-        if (!Boolean.getBoolean("chessai.classifier.noLearned")) {
+        if (useLearnedTemplates) {
             loadLearnedTemplates();
         }
     }
 
     private void loadLearnedTemplates() {
-        String manifest = "/templates/learned/manifest.csv";
-        try (InputStream stream = getClass().getResourceAsStream(manifest)) {
-            if (stream == null) {
-                return;
+        String manifest = source.text("/templates/learned/manifest.csv");
+        if (manifest == null) {
+            return;
+        }
+        String[] lines = manifest.split("\\R");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("theme,")) {
+                continue;
             }
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(stream, StandardCharsets.UTF_8));
-            String line = reader.readLine();
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) {
+            String[] parts = line.split(",", -1);
+            if (parts.length < 9) {
+                continue;
+            }
+            try {
+                String themeName = parts[0].trim();
+                int type = Integer.parseInt(parts[1].trim());
+                int color = Integer.parseInt(parts[2].trim());
+                double crop = Double.parseDouble(parts[4].trim());
+                String resource = "/templates/learned/" + parts[8].trim();
+                boolean[] shape = loadShape(resource);
+                if (shape == null) {
                     continue;
                 }
-                String[] parts = line.split(",", -1);
-                if (parts.length < 9) {
-                    continue;
-                }
-                try {
-                    String themeName = parts[0].trim();
-                    int type = Integer.parseInt(parts[1].trim());
-                    int color = Integer.parseInt(parts[2].trim());
-                    double crop = Double.parseDouble(parts[4].trim());
-                    String resource = "/templates/learned/" + parts[8].trim();
-                    boolean[] shape = loadShape(resource);
-                    if (shape == null) {
-                        continue;
-                    }
-                    Theme theme = themes.computeIfAbsent(themeName,
-                            key -> new Theme(key, crop));
-                    theme.templates.add(new Template(type, color, shape, true,
-                            themeName, crop));
-                } catch (NumberFormatException ignored) {
-                    // Skip malformed manifest rows rather than disabling recognition.
-                }
+                Theme theme = themes.computeIfAbsent(themeName,
+                        key -> new Theme(key, crop));
+                theme.templates.add(new Template(type, color, shape, true,
+                        themeName, crop));
+            } catch (NumberFormatException ignored) {
+                // Skip malformed manifest rows rather than disabling recognition.
             }
-        } catch (IOException ignored) {
-            // Learned templates are optional; the built-in templates still work.
         }
     }
 
     private boolean[] loadShape(String resource) {
-        try (InputStream stream = getClass().getResourceAsStream(resource)) {
-            if (stream == null) {
-                return null;
-            }
-            BufferedImage image = ImageIO.read(stream);
-            if (image == null) {
-                return null;
-            }
-            boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
-            for (int y = 0; y < NORMALIZED; y++) {
-                for (int x = 0; x < NORMALIZED; x++) {
-                    int sx = x * image.getWidth() / NORMALIZED;
-                    int sy = y * image.getHeight() / NORMALIZED;
-                    int rgb = image.getRGB(sx, sy);
-                    int r = (rgb >>> 16) & 0xff;
-                    int g = (rgb >>> 8) & 0xff;
-                    int b = rgb & 0xff;
-                    raw[y * NORMALIZED + x] = (0.299 * r + 0.587 * g + 0.114 * b) > 127;
-                }
-            }
-            return normalizeShape(raw, NORMALIZED);
-        } catch (IOException ignored) {
+        GrayImage image = source.image(resource);
+        if (image == null) {
             return null;
         }
+        boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
+        for (int y = 0; y < NORMALIZED; y++) {
+            for (int x = 0; x < NORMALIZED; x++) {
+                int sx = x * image.width / NORMALIZED;
+                int sy = y * image.height / NORMALIZED;
+                raw[y * NORMALIZED + x] = image.luminance(sx, sy) > 127;
+            }
+        }
+        return normalizeShape(raw, NORMALIZED);
     }
 
     private void loadTemplate(int type, boolean flat, String resource) {
-        try (InputStream stream = getClass().getResourceAsStream(resource)) {
-            if (stream == null) {
-                return;
-            }
-            BufferedImage image = ImageIO.read(stream);
-            if (image == null) {
-                return;
-            }
-            double[] values = new double[NORMALIZED * NORMALIZED];
-            for (int y = 0; y < NORMALIZED; y++) {
-                for (int x = 0; x < NORMALIZED; x++) {
-                    int sx = x * image.getWidth() / NORMALIZED;
-                    int sy = y * image.getHeight() / NORMALIZED;
-                    int rgb = image.getRGB(sx, sy);
-                    int r = (rgb >>> 16) & 0xff;
-                    int g = (rgb >>> 8) & 0xff;
-                    int b = rgb & 0xff;
-                    values[y * NORMALIZED + x] = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0;
-                }
-            }
-            boolean[] raw = new boolean[values.length];
-            for (int i = 0; i < values.length; i++) {
-                raw[i] = values[i] > 0.45;
-            }
-            templates.add(new Template(type, normalizeShape(raw, NORMALIZED)));
-        } catch (IOException ignored) {
-            // A missing optional template should not stop recognition.
+        GrayImage image = source.image(resource);
+        if (image == null) {
+            return;
         }
+        boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
+        for (int y = 0; y < NORMALIZED; y++) {
+            for (int x = 0; x < NORMALIZED; x++) {
+                int sx = x * image.width / NORMALIZED;
+                int sy = y * image.height / NORMALIZED;
+                raw[y * NORMALIZED + x] = image.luminance(sx, sy) / 255.0 > 0.45;
+            }
+        }
+        templates.add(new Template(type, normalizeShape(raw, NORMALIZED)));
     }
 
     public Recognition recognize(RasterImage image, BoardDetector.Detection detection) {

@@ -17,18 +17,18 @@ public final class ScreenshotAnalyzer {
     }
 
     public static Recognition analyze(File file) throws IOException {
-        RasterImage image = RasterImage.load(file);
+        RasterImage image = ImageIoRaster.load(file);
         BoardDetector.Detection detection = BoardDetector.detect(image);
-        PieceClassifier classifier = new PieceClassifier();
+        PieceClassifier classifier = new PieceClassifier(new AwtTemplateSource());
         return classifier.recognize(image, detection);
     }
 
     public static Recognition analyze(File file, BoardQuad quad) throws IOException {
-        RasterImage image = RasterImage.load(file);
+        RasterImage image = ImageIoRaster.load(file);
         Homography homography = Homography.fromQuad(quad);
         BoardDetector.Detection detection =
                 new BoardDetector.Detection(quad, homography, 1.0, "manual");
-        PieceClassifier classifier = new PieceClassifier();
+        PieceClassifier classifier = new PieceClassifier(new AwtTemplateSource());
         return classifier.recognize(image, detection);
     }
 
