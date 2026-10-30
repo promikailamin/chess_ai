@@ -22,8 +22,9 @@ simulator, and running engine-vs-engine self-play games.
 
 - Java 17+
 - Maven 3.8+
-- Python 3.10+ with `numpy`, `opencv-python-headless` and `pillow` only if you
-  want to regenerate the bundled piece templates.
+- Python 3.10+ only if you want to regenerate templates or build a vision
+  dataset. Install the optional tooling with
+  `pip install -r tools/requirements-vision.txt`.
 
 ## Build and test
 
@@ -98,24 +99,88 @@ when a game starts so it does not cover the board in screenshots.
 
 ## Recognition notes
 
-The classifier works best on the flat/vector-style board themes included in
-`screenshots/`. The primary 2D reference screenshot is recognized exactly as:
+The classifier finds the board with a Hough/grid search and matches every
+square against per-theme colour templates that encode both piece shape and
+appearance. The primary 2D reference screenshot is recognized exactly as:
 
 ```text
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ```
 
-Rendered/3D themes (perspective pieces with shadows) are located geometrically,
-but the bundled classifier treats piece identification as best-effort. The
-built-in 2D/3D templates live in `src/main/resources/templates/`. Optional
-learned per-theme templates are loaded when
-`-Dchessai.classifier.learned=true` is set (they are off by default because
-some generated theme sets are noisier than the built-in silhouettes). Templates
-can be regenerated with:
+The default template set is `color` (`src/main/resources/templates/color`).
+Select a different classpath set with `-Dchessai.templates=<name>`, or point at
+a template directory produced by the trainer with
+`-Dchessai.templates.dir=<path> -Dchessai.templates=<name>`. For debugging a
+single board theme, add `-Dchessai.forceTheme=<theme>`.
+
+On the 157-case manual benchmark (140 generated puzzles plus the 17 reference
+screenshots) the bundled `color` templates score **97.5% exact positions** and
+**99.84% correct squares**. The remaining errors are isolated single-square
+piece confusions; the benchmark supplies manual board corners, so it does not
+measure automatic board detection.
+
+## Vision dataset and training
+
+The reproducible vision tooling lives in `tools/`:
 
 ```bash
-python3 tools/generate_templates.py
+# 1. Download chess images and licence metadata from Wikimedia Commons.
+#    The downloader is resumable and writes dataset/internet_manifest.json.
+python3 tools/download_chess_images.py --target 1200 \
+    --out .agent-work/tmp/internet_images \
+    --manifest dataset/internet_manifest.json
+
+# 2. Generate labelled screenshots from the 17 reference boards.
+#    --augment strong adds scale/perspective/JPEG/blur/noise variation.
+python3 tools/build_vision_dataset.py --count 1200 \
+    --train-size 1000 --validation-size 100 \
+    --dataset-dir .agent-work/tmp/vision_dataset \
+    --templates-dir .agent-work/tmp/vision_dataset/learned \
+    --augment strong --crop 1.0
+
+# 3. Train per-theme templates (median sprite per piece).
+python3 tools/train_vision_model.py \
+    --labels .agent-work/tmp/vision_dataset/labels.json \
+    --out .agent-work/tmp/vision_dataset/trained \
+    --splits train --exemplars 1
+
+# 4. Benchmark a template set on held-out puzzles.
+javac -cp target/classes -d .agent-work/tmp \
+    .agent-work/tests/VisionBenchmark.java
+java -cp target/classes:.agent-work/tmp \
+    -Dchessai.templates=color \
+    -Dchessai.templates.dir=src/main/resources/templates/color \
+    VisionBenchmark --manual .agent-work/tmp/vision_dataset/test_cases.tsv
 ```
+
+`--exemplars 1` selects the median sprite. Using several noisy exemplars per
+piece makes the matcher worse (39% vs 99% exact on the strong-augmented test
+split), so the trainer defaults to one median template per piece.
+
+Training on the clean reference screenshots reproduces the bundled accuracy
+(99.0% exact / 99.97% squares on the 1200-image test split). Training on 1000
+strongly augmented screenshots reaches 54.0% exact / 97.53% squares; the blur
+and JPEG noise survive the median and make the learned templates less sharp
+than the clean `color` set. The `color` templates therefore remain the runtime
+default, while the trainer is useful for adding new board themes from clean
+reference screenshots.
+
+`tools/export_color_templates.py` regenerates the bundled `color` set from
+`dataset/pieces`, and `tools/generate_templates.py` regenerates the built-in
+silhouette templates. `dataset/internet_manifest.json` records the downloaded
+image URLs, licences and attribution; the image files themselves are kept out
+of git.
+
+The downloader collected **1208 images** from Wikimedia Commons (public domain
+and CC/GPL licences). Running the automatic detector over all of them found a
+board with score >= 0.5 in **56 images (4.6%)**; most of the rest are chess
+photos, people, or diagrams whose board does not fill the frame. Automatic
+board detection is tuned for app screenshots, so the internet manifest is
+useful for detector evaluation and for selecting clean reference boards, not
+as a direct source of piece-level labels. The detector summary and the top
+overlays are written to `.agent-work/logs/internet-benchmark.log` and
+`.agent-work/outputs/internet_overlays/` when
+`.agent-work/tests/InternetBenchmark.java` is run.
 
 ## Project layout
 
@@ -130,5 +195,11 @@ android/                        Android accessibility floating chess bot
 src/main/resources/templates/  2D and 3D piece templates
 src/test/java/                  JUnit 5 regression tests
 tools/generate_templates.py     template regeneration helper
+tools/download_chess_images.py  Wikimedia Commons image downloader
+tools/build_vision_dataset.py   labelled screenshot generator
+tools/train_vision_model.py     per-theme template trainer
+tools/export_color_templates.py export sprites as runtime colour templates
+tools/requirements-vision.txt   optional Python tooling dependencies
+dataset/                        reference manifests, labels and piece sprites
 screenshots/                    reference screenshots
 ```

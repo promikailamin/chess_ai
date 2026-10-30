@@ -18,7 +18,7 @@ Typical use::
 
     python3 tools/train_vision_model.py \
         --labels .agent-work/tmp/vision_dataset/labels.json \
-        --out src/main/resources/templates/trained --exemplars 3
+        --out src/main/resources/templates/trained --exemplars 1
 
 Requirements: ``numpy``, ``opencv-python-headless`` and ``pillow`` (see
 ``tools/requirements-vision.txt``).
@@ -300,8 +300,8 @@ def main() -> None:
     parser.add_argument("--splits", nargs="+", default=["train"],
                         help="label splits to train on (default: train)")
     parser.add_argument("--size", type=int, default=48, help="template size in pixels")
-    parser.add_argument("--exemplars", type=int, default=3,
-                        help="number of exemplar templates per class")
+    parser.add_argument("--exemplars", type=int, default=1,
+                        help="templates per piece; 1 = median sprite (default: 1)")
     parser.add_argument("--min-samples", type=int, default=1,
                         help="minimum sprites required for a template")
     parser.add_argument("--clean", action="store_true",

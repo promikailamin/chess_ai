@@ -1,0 +1,24 @@
+cases=100 exact=99 (99.0%) piece=6399/6400 (99.98%)
+  classic-flat         6/6
+  denim-3d             5/5
+  denim-flat           6/6
+  mahogany-3d          6/6
+  marble-3d            5/5
+  marble-bw-flat       5/6
+  marble-flat          6/6
+  oak-3d               6/6
+  ocean-3d             6/6
+  plaid-3d             6/6
+  plaid-flat           6/6
+  rustic-3d            6/6
+  teal-flat            6/6
+  walnut-flat          6/6
+  wood-3d              6/6
+  wood-flat            6/6
+  woodland-3d          6/6
+confusion expected->got:
+  R -> {K=1}
+failures:
+.agent-work/tmp/vision_dataset/puzzles/puzzle_1183.jpg theme=marble-bw-flat split=test pieces=63/64 conf=0.90
+  exp 1rb1k3/p1npnp1q/3P4/Q3br1p/7P/4RP1R/5N2/5K2 b - - 1 41
+  got 1rb1k3/p1npnp1q/3P4/Q3br1p/7P/4RP1K/5N2/5K2 w - - 0 1

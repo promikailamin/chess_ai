@@ -1,0 +1,5 @@
+images=1208 analyzed=1208 failed=0
+boardScore mean=0.196 median=0.161
+boardScore>=0.5 56 (4.6%)  >=0.7 29 (2.4%)  >=0.9 11 (0.9%)
+confidence mean=0.811 emptyBoards=13
+failures:

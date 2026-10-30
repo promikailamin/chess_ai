@@ -19,7 +19,7 @@ public final class ScreenshotAnalyzer {
     public static Recognition analyze(File file) throws IOException {
         RasterImage image = ImageIoRaster.load(file);
         BoardDetector.Detection detection = BoardDetector.detect(image);
-        PieceClassifier classifier = new PieceClassifier(new AwtTemplateSource());
+        PieceClassifier classifier = new PieceClassifier(TemplateSources.create());
         return classifier.recognize(image, detection);
     }
 
@@ -28,7 +28,7 @@ public final class ScreenshotAnalyzer {
         Homography homography = Homography.fromQuad(quad);
         BoardDetector.Detection detection =
                 new BoardDetector.Detection(quad, homography, 1.0, "manual");
-        PieceClassifier classifier = new PieceClassifier(new AwtTemplateSource());
+        PieceClassifier classifier = new PieceClassifier(TemplateSources.create());
         return classifier.recognize(image, detection);
     }
 

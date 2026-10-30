@@ -1,0 +1,12 @@
+  processed 100/1000 images
+  processed 200/1000 images
+  processed 300/1000 images
+  processed 400/1000 images
+  processed 500/1000 images
+  processed 600/1000 images
+  processed 700/1000 images
+  processed 800/1000 images
+  processed 900/1000 images
+  processed 1000/1000 images
+Trained 204 templates from 1000 images (27163 sprites, 0 rejected)
+Wrote /home/runner/work/chess_ai/chess_ai/.agent-work/tmp/vision_dataset_normal/trained1/manifest.csv

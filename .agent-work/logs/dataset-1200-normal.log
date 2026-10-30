@@ -1,0 +1,23 @@
+Extracting pieces from 17 reference screenshots
+  woodland-3d        crop=1.00 6 white / 6 black sprites
+  rustic-3d          crop=1.00 6 white / 6 black sprites
+  wood-flat          crop=1.00 6 white / 6 black sprites
+  walnut-flat        crop=1.00 6 white / 6 black sprites
+  teal-flat          crop=1.00 6 white / 6 black sprites
+  classic-flat       crop=1.00 6 white / 6 black sprites
+  plaid-flat         crop=1.00 6 white / 6 black sprites
+  marble-flat        crop=1.00 6 white / 6 black sprites
+  denim-flat         crop=1.00 6 white / 6 black sprites
+  marble-bw-flat     crop=1.00 6 white / 6 black sprites
+  marble-3d          crop=1.00 6 white / 6 black sprites
+  denim-3d           crop=1.00 6 white / 6 black sprites
+  ocean-3d           crop=1.00 6 white / 6 black sprites
+  plaid-3d           crop=1.00 6 white / 6 black sprites
+  wood-3d            crop=1.00 6 white / 6 black sprites
+  mahogany-3d        crop=1.00 6 white / 6 black sprites
+  oak-3d             crop=1.00 6 white / 6 black sprites
+Wrote 204 learned templates to /home/runner/work/chess_ai/chess_ai/.agent-work/tmp/vision_dataset_normal/learned/manifest.csv
+Rendering 1200 labelled screenshot puzzles
+Wrote 1200 labels to /home/runner/work/chess_ai/chess_ai/.agent-work/tmp/vision_dataset_normal/labels.csv
+Puzzle image size: 120.36 MiB
+Splits: 1000 train, 100 validation, 100 test

@@ -14,3 +14,17 @@ android/.idea/
 android/build/
 android/app/build/
 android/local.properties
+
+# Large downloaded/generated training data (reproducible via tools/)
+.agent-work/tmp/internet_images/
+.agent-work/tmp/vision_dataset/
+.agent-work/tmp/trained_*/
+.agent-work/tmp/vision_dataset_normal/
+.agent-work/tmp/vision_smoke/
+.agent-work/tmp/test_images/
+.agent-work/tmp/test_manifest.json
+.agent-work/tmp/test_contact.jpg
+.agent-work/tmp/pawn_compare.png
+.agent-work/tmp/ref_labels.json
+.agent-work/tmp/download-internet.pid
+.agent-work/outputs/internet_overlays/

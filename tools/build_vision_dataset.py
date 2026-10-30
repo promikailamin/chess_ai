@@ -321,7 +321,8 @@ def random_position(rng: random.Random, min_plies: int = 8, max_plies: int = 84)
 
 
 def render_position(board: chess.Board, sprites: dict[str, dict[str, Sprite]],
-                    backgrounds: dict[int, np.ndarray], rng: random.Random) -> np.ndarray:
+                    backgrounds: dict[int, np.ndarray], rng: random.Random,
+                    strong: bool = False) -> np.ndarray:
     canvas = np.zeros((BOARD, BOARD, 3), np.uint8)
     for row in range(8):
         for col in range(8):
@@ -344,27 +345,35 @@ def render_position(board: chess.Board, sprites: dict[str, dict[str, Sprite]],
             sprite.rgb.astype(np.float32) * alpha + target * (1.0 - alpha)
         ).astype(np.uint8)
 
-    brightness = rng.uniform(0.92, 1.08)
-    contrast = rng.uniform(0.92, 1.08)
+    if strong:
+        brightness = rng.uniform(0.84, 1.16)
+        contrast = rng.uniform(0.84, 1.16)
+    else:
+        brightness = rng.uniform(0.92, 1.08)
+        contrast = rng.uniform(0.92, 1.08)
     canvas = np.clip(canvas.astype(np.float32) * brightness, 0, 255)
     canvas = np.clip((canvas - 127.5) * contrast + 127.5, 0, 255).astype(np.uint8)
-    if rng.random() < 0.35:
-        noise = rng.uniform(-7.0, 7.0)
+    noise_probability = 0.6 if strong else 0.35
+    if rng.random() < noise_probability:
+        noise = rng.uniform(-12.0, 12.0) if strong else rng.uniform(-7.0, 7.0)
         canvas = np.clip(canvas.astype(np.float32) + noise, 0, 255).astype(np.uint8)
-    if rng.random() < 0.25:
-        canvas = cv2.GaussianBlur(canvas, (3, 3), 0)
+    blur_probability = 0.45 if strong else 0.25
+    if rng.random() < blur_probability:
+        kernel = 5 if strong and rng.random() < 0.4 else 3
+        canvas = cv2.GaussianBlur(canvas, (kernel, kernel), 0)
     return canvas
 
 
-def paste_board(reference: dict, rendered: np.ndarray, rng: random.Random
-                ) -> tuple[np.ndarray, np.ndarray]:
+def paste_board(reference: dict, rendered: np.ndarray, rng: random.Random,
+                strong: bool = False) -> tuple[np.ndarray, np.ndarray]:
     image = cv2.imread(os.path.join(ROOT, reference["file"]))
     if image is None:
         raise FileNotFoundError(reference["file"])
-    scale = 0.5
+    scale = rng.uniform(0.46, 0.54) if strong else 0.5
     image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
     quad = np.array(reference["quad"], dtype=np.float32) * scale
-    jitter = np.array([[rng.uniform(-2.5, 2.5), rng.uniform(-2.5, 2.5)]
+    amount = 6.0 if strong else 2.5
+    jitter = np.array([[rng.uniform(-amount, amount), rng.uniform(-amount, amount)]
                        for _ in range(4)], dtype=np.float32)
     quad = quad + jitter
     height, width = image.shape[:2]
@@ -392,13 +401,37 @@ def contact_sheet(paths: list[str], target: str, columns: int = 5) -> None:
 
 
 def main() -> None:
+    global DATASET, PUZZLES, PIECES, TEMPLATES, WORK_OUTPUTS
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=20261030)
     parser.add_argument("--count", type=int, default=140)
     parser.add_argument("--clean", action="store_true", help="remove previously generated puzzles")
     parser.add_argument("--crop", type=float, default=None,
                         help="force one sprite crop fraction for every reference")
+    parser.add_argument("--dataset-dir", default=DATASET,
+                        help="output dataset directory (labels and puzzles)")
+    parser.add_argument("--templates-dir", default=TEMPLATES,
+                        help="output directory for learned shape templates")
+    parser.add_argument("--preview-dir", default=WORK_OUTPUTS,
+                        help="output directory for contact sheets")
+    parser.add_argument("--reference-manifest",
+                        default=os.path.join(DATASET, "reference_manifest.json"),
+                        help="input reference manifest")
+    parser.add_argument("--train-size", type=int, default=100,
+                        help="number of training puzzles")
+    parser.add_argument("--validation-size", type=int, default=20,
+                        help="number of validation puzzles")
+    parser.add_argument("--augment", choices=["normal", "strong"], default="normal",
+                        help="screenshot augmentation strength")
+    parser.add_argument("--jpeg-quality", type=int, default=0,
+                        help="fixed JPEG quality; 0 chooses 62-92 when strong")
     args = parser.parse_args()
+
+    DATASET = os.path.abspath(args.dataset_dir)
+    PUZZLES = os.path.join(DATASET, "puzzles")
+    PIECES = os.path.join(DATASET, "pieces")
+    TEMPLATES = os.path.abspath(args.templates_dir)
+    WORK_OUTPUTS = os.path.abspath(args.preview_dir)
 
     if args.clean:
         for directory in (PUZZLES, PIECES, TEMPLATES):
@@ -408,7 +441,7 @@ def main() -> None:
     os.makedirs(TEMPLATES, exist_ok=True)
     os.makedirs(WORK_OUTPUTS, exist_ok=True)
 
-    manifest = json.load(open(os.path.join(DATASET, "reference_manifest.json"), encoding="utf-8"))
+    manifest = json.load(open(args.reference_manifest, encoding="utf-8"))
     rng = random.Random(args.seed)
 
     all_sprites: dict[str, dict[str, dict[str, Sprite]]] = {}
@@ -450,21 +483,27 @@ def main() -> None:
     test_paths = []
 
     print(f"Rendering {args.count} labelled screenshot puzzles")
+    strong = args.augment == "strong"
     for index in range(args.count):
-        if index < 100:
+        if index < args.train_size:
             split = "train"
-        elif index < 120:
+        elif index < args.train_size + args.validation_size:
             split = "validation"
         else:
             split = "test"
         reference = references[index % len(references)]
         theme = reference["theme"]
         board = random_position(rng)
-        rendered = render_position(board, all_sprites[theme], all_backgrounds[theme], rng)
-        screenshot, quad = paste_board(reference, rendered, rng)
+        rendered = render_position(board, all_sprites[theme], all_backgrounds[theme],
+                                   rng, strong)
+        screenshot, quad = paste_board(reference, rendered, rng, strong)
         name = f"puzzle_{index + 1:04d}.jpg"
         path = os.path.join(PUZZLES, name)
-        cv2.imwrite(path, screenshot, [int(cv2.IMWRITE_JPEG_QUALITY), 82])
+        if args.jpeg_quality:
+            quality = args.jpeg_quality
+        else:
+            quality = rng.randint(62, 92) if strong else 82
+        cv2.imwrite(path, screenshot, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
         label = {
             "id": f"puzzle_{index + 1:04d}",
             "image": os.path.relpath(path, ROOT),

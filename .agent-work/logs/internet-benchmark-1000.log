@@ -1,0 +1,9 @@
+images=1024 analyzed=1020 failed=4
+boardScore mean=0.204 median=0.167
+boardScore>=0.5 55 (5.4%)  >=0.7 28 (2.7%)  >=0.9 11 (1.1%)
+confidence mean=0.809 emptyBoards=12
+failures:
+  .agent-work/tmp/internet_images/d431cad3e41b2f01.webp IOException: Unsupported image: .agent-work/tmp/internet_images/d431cad3e41b2f01.webp
+  .agent-work/tmp/internet_images/20afc254b4b1134b.webp IOException: Unsupported image: .agent-work/tmp/internet_images/20afc254b4b1134b.webp
+  .agent-work/tmp/internet_images/fc9cb1710a9c7ca6.webp IOException: Unsupported image: .agent-work/tmp/internet_images/fc9cb1710a9c7ca6.webp
+  .agent-work/tmp/internet_images/d47cd24b4a078329.webp IOException: Unsupported image: .agent-work/tmp/internet_images/d47cd24b4a078329.webp
