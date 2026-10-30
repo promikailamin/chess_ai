@@ -1,0 +1,40 @@
+cases=157 exact=152 (96.8%) piece=10029/10048 (99.81%)
+  classic-flat         9/9
+  denim-3d             8/9
+  denim-flat           9/9
+  mahogany-3d          9/9
+  marble-3d            8/9
+  marble-bw-flat       9/9
+  marble-flat          9/9
+  oak-3d               9/9
+  ocean-3d             9/9
+  plaid-3d             9/9
+  plaid-flat           9/9
+  rustic-3d            9/10
+  teal-flat            9/9
+  walnut-flat          10/10
+  wood-3d              8/9
+  wood-flat            9/10
+  woodland-3d          10/10
+confusion expected->got:
+  . -> {Q=1}
+  P -> {B=1, K=1, Q=2, R=2}
+  n -> {q=1}
+  p -> {B=1, k=5, q=2, r=1}
+  r -> {n=1, p=1}
+failures:
+screenshots/Screenshot_2026-10-29-19-55-03-334_com.llx.chess.jpg theme=rustic-3d split=reference pieces=61/64 conf=0.91
+  exp rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1
+  got rnbqkbr1/1pp1qBpp/p2ppp2/7n/1PP1P2P/P2P1PP1/4Q3/RNBQKBNR w KQq - 0 1
+screenshots/Screenshot_2026-10-29-19-55-18-000_com.llx.chess.jpg theme=wood-flat split=reference pieces=60/64 conf=0.82
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got nnbqkbnr/pppppprq/8/8/8/8/PPPPPPRP/RNBQKBNR w KQk - 0 1
+screenshots/Screenshot_2026-10-29-20-02-47-190_com.llx.chess.jpg theme=marble-3d split=reference pieces=55/64 conf=0.87
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rqbqkbnr/pkpkppkp/8/8/8/8/QBQKPPRP/RNBQKBNR w KQkq - 0 1
+screenshots/Screenshot_2026-10-29-20-02-53-590_com.llx.chess.jpg theme=denim-3d split=reference pieces=63/64 conf=0.93
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pppppppk/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+screenshots/Screenshot_2026-10-29-20-03-02-796_com.llx.chess.jpg theme=wood-3d split=reference pieces=62/64 conf=0.91
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnp/pppppppk/8/8/8/8/PPPPPPPP/RNBQKBNR w KQq - 0 1

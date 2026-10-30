@@ -1,0 +1,55 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.chessai:chess-ai >------------------------
+[INFO] Building chess-ai 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Loaded 24299 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ chess-ai ---
+[INFO] Copying 436 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ chess-ai ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ chess-ai ---
+[INFO] skip non existing resourceDirectory /home/runner/work/chess_ai/chess_ai/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ chess-ai ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 8 source files with javac [debug release 17] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ chess-ai ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.chessai.vision.ExternalVisionDatasetTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.442 s -- in com.chessai.vision.ExternalVisionDatasetTest
+[INFO] Running com.chessai.vision.ScreenshotAnalyzerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.646 s -- in com.chessai.vision.ScreenshotAnalyzerTest
+[INFO] Running com.chessai.autoplay.TurnTextTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.chessai.autoplay.TurnTextTest
+[INFO] Running com.chessai.autoplay.ScreenshotAutoplayTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.575 s -- in com.chessai.autoplay.ScreenshotAutoplayTest
+[INFO] Running com.chessai.autoplay.OrientationDetectorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in com.chessai.autoplay.OrientationDetectorTest
+[INFO] Running com.chessai.autoplay.AutoPlaySessionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 s -- in com.chessai.autoplay.AutoPlaySessionTest
+[INFO] Running com.chessai.engine.PerftTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.094 s -- in com.chessai.engine.PerftTest
+[INFO] Running com.chessai.engine.PositionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.chessai.engine.PositionTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 26, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.216 s
+[INFO] Finished at: 2026-10-30T09:28:53Z
+[INFO] ------------------------------------------------------------------------

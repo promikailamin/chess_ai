@@ -1,0 +1,25 @@
+cases=320 exact=219 (68.4%) piece=20353/20480 (99.38%)
+  lichess-brown        219/320
+confusion expected->got:
+  n -> {p=98}
+  q -> {k=1}
+  r -> {p=28}
+failures:
+dataset/external/lichess_boards/images/lichess-boards_train_28.jpg theme=lichess-brown split=train pieces=62/64 conf=0.83
+  exp k1r1b3/p1r1nppp/Bp1qpn2/2Np4/1P1P4/PQR1PN2/5PPP/2R3K1 b - - 0 1
+  got k1r1b3/p1r1pppp/Bp1qpp2/2Np4/1P1P4/PQR1PN2/5PPP/2R3K1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_109.jpg theme=lichess-brown split=train pieces=63/64 conf=0.84
+  exp 6R1/p7/5k2/P7/6KP/8/8/5r2 b - - 0 1
+  got 6R1/p7/5k2/P7/6KP/8/8/5p2 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_128.jpg theme=lichess-brown split=train pieces=63/64 conf=0.85
+  exp 2kr3r/p1p1Rpp1/2p2n1p/8/8/1P6/P1P2PPP/RNB3K1 b - - 0 1
+  got 2kr3r/p1p1Rpp1/2p2p1p/8/8/1P6/P1P2PPP/RNB3K1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_233.jpg theme=lichess-brown split=train pieces=63/64 conf=0.83
+  exp 1r4k1/p4p1p/6p1/3rb3/K7/2PpB3/1P1R1PPP/3R4 b - - 0 1
+  got 1r4k1/p4p1p/6p1/3pb3/K7/2PpB3/1P1R1PPP/3R4 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_191.jpg theme=lichess-brown split=train pieces=63/64 conf=0.83
+  exp r2qk2r/ppp2ppp/2n1b3/1B1N4/3b4/3P1N1P/P1P1QPP1/1R2K2R b Kkq - 0 1
+  got r2qk2r/ppp2ppp/2p1b3/1B1N4/3b4/3P1N1P/P1P1QPP1/1R2K2R w Kkq - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_154.jpg theme=lichess-brown split=train pieces=63/64 conf=0.84
+  exp r2qr1k1/p5bp/1pp1N1p1/8/2Q2p2/2P1n2P/PP3PP1/R1B1RNK1 b - - 0 1
+  got r2qr1k1/p5bp/1pp1N1p1/8/2Q2p2/2P1p2P/PP3PP1/R1B1RNK1 w - - 0 1

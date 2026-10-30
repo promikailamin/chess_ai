@@ -1,0 +1,17 @@
+== lichess-boards (bingbangboom/chess-puzzles-images-mini, CC0-1.0) -> dataset/external/lichess_boards/lichess_boards
+  lichess-boards: 25 new images
+  lichess-boards: 50 new images
+  lichess-boards: 75 new images
+  lichess-boards: 100 new images
+  lichess-boards: 125 new images
+  lichess-boards: 150 new images
+  lichess-boards: 175 new images
+  lichess-boards: 200 new images
+  lichess-boards: 225 new images
+  lichess-boards/train: kept 240/240
+  lichess-boards: 250 new images
+  lichess-boards: 275 new images
+  lichess-boards/validation: kept 40/40
+  lichess-boards: 300 new images
+  lichess-boards/test: kept 40/40
+Wrote 320 labels to dataset/external/lichess_boards/lichess_boards/labels.json

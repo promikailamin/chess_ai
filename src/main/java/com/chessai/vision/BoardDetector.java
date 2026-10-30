@@ -46,6 +46,10 @@ public final class BoardDetector {
         int h = work.getHeight();
 
         HoughDetector.Result hough = HoughDetector.detect(work);
+        Detection squareBoard = detectSquareBoard(work, scale, hough);
+        if (squareBoard != null) {
+            return squareBoard;
+        }
         List<BoardQuad> guesses = new ArrayList<>();
 
         List<Sequence> verticalSequences = findSequences(work, true);
@@ -62,6 +66,16 @@ public final class BoardDetector {
         }
 
         guesses.add(BoardQuad.rectangle(0.313 * w, 0.030 * h, 0.733 * w, 0.967 * h));
+        // Square board-only images (for example Lichess analysis screenshots)
+        // often fill almost the entire frame, unlike phone screenshots where
+        // the board is surrounded by UI chrome.
+        guesses.add(BoardQuad.rectangle(0.020 * w, 0.020 * h, 0.980 * w, 0.980 * h));
+        guesses.add(BoardQuad.rectangle(0.035 * w, 0.035 * h, 0.965 * w, 0.965 * h));
+        // Lichess board screenshots have a 19px coordinate gutter on a 512px
+        // canvas, i.e. about 3.7% per side.
+        guesses.add(BoardQuad.rectangle(19.0 / 512.0 * w, 19.0 / 512.0 * h,
+                (1.0 - 19.0 / 512.0) * w, (1.0 - 19.0 / 512.0) * h));
+        guesses.add(BoardQuad.rectangle(0.050 * w, 0.050 * h, 0.950 * w, 0.950 * h));
         guesses.add(BoardQuad.rectangle(0.280 * w, 0.020 * h, 0.770 * w, 0.980 * h));
         guesses.add(new BoardQuad(0.300 * w, 0.050 * h, 0.745 * w, 0.050 * h,
                 0.800 * w, 0.960 * h, 0.240 * w, 0.960 * h));
@@ -116,6 +130,187 @@ public final class BoardDetector {
         return best;
     }
 
+    /**
+     * Board-only square images (Lichess/analysis exports and the downloaded
+     * Hugging Face screenshots) have a grid that fills almost the whole frame.
+     * The regular heuristic deliberately ignores grids wider than ~68% of the
+     * image because phone screenshots always contain UI chrome, so handle this
+     * layout explicitly instead of falling back to a label-inclusive guess.
+     */
+    private static Detection detectSquareBoard(RasterImage image, double scale,
+                                               HoughDetector.Result hough) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        if (Math.abs(w - h) > 0.08 * Math.max(w, h)) {
+            return null;
+        }
+        Detection flat = detectFlatSquareBoard(image, scale);
+        if (flat != null) {
+            return flat;
+        }
+        LineGrid lineGrid = findLineGrid(hough, image, true);
+        if (lineGrid != null) {
+            Homography fitted = fitFromLines(lineGrid.vertical, lineGrid.horizontal, image);
+            if (fitted != null) {
+                BoardQuad quad = quadFromHomography(fitted, image);
+                double score = checkerboardScore(image, fitted);
+                if (score > 0.15) {
+                    if (scale < 0.999) {
+                        BoardQuad full = quad.scaled(1.0 / scale);
+                        return new Detection(full, Homography.fromQuad(full), score,
+                                "square-grid");
+                    }
+                    return new Detection(quad, fitted, score, "square-grid");
+                }
+            }
+        }
+        List<Sequence> vertical = findSequences(image, true, true);
+        List<Sequence> horizontal = findSequences(image, false, true);
+        Detection best = null;
+        for (Sequence v : vertical.subList(0, Math.min(6, vertical.size()))) {
+            double spanX = v.positions[8] - v.positions[0];
+            if (spanX < 0.80 * w) {
+                continue;
+            }
+            for (Sequence hs : horizontal.subList(0, Math.min(6, horizontal.size()))) {
+                double spanY = hs.positions[8] - hs.positions[0];
+                if (spanY < 0.80 * h) {
+                    continue;
+                }
+                if (Math.abs(spanX - spanY) > 0.08 * Math.max(spanX, spanY)) {
+                    continue;
+                }
+                BoardQuad quad = BoardQuad.rectangle(v.positions[0], hs.positions[0],
+                        v.positions[8], hs.positions[8]);
+                double score = checkerboardScore(image, Homography.fromQuad(quad));
+                if (score < 0.15) {
+                    continue;
+                }
+                if (best == null || score > best.score) {
+                    if (scale < 0.999) {
+                        BoardQuad full = quad.scaled(1.0 / scale);
+                        best = new Detection(full, Homography.fromQuad(full), score,
+                                "square-grid");
+                    } else {
+                        best = new Detection(quad, Homography.fromQuad(quad), score,
+                                "square-grid");
+                    }
+                }
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Flat board-only images use two dominant colours for the 64 squares.  The
+     * bounding box of those colours is a much more reliable board outline than
+     * the coordinate labels, which otherwise look like extra grid lines.
+     */
+    private static Detection detectFlatSquareBoard(RasterImage image, double scale) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int bins = 16;
+        int[] histogram = new int[bins * bins * bins];
+        int step = Math.max(1, Math.max(w, h) / 512);
+        for (int y = 0; y < h; y += step) {
+            for (int x = 0; x < w; x += step) {
+                int[] rgb = image.rgbAt(x, y);
+                int index = ((rgb[0] >> 4) << 8) | ((rgb[1] >> 4) << 4) | (rgb[2] >> 4);
+                histogram[index]++;
+            }
+        }
+        int first = -1;
+        int second = -1;
+        for (int index = 0; index < histogram.length; index++) {
+            if (first < 0 || histogram[index] > histogram[first]) {
+                second = first;
+                first = index;
+            } else if (second < 0 || histogram[index] > histogram[second]) {
+                second = index;
+            }
+        }
+        if (first < 0 || second < 0) {
+            return null;
+        }
+        double[] firstColour = binColour(first);
+        double[] secondColour = binColour(second);
+        int rows = (h + step - 1) / step;
+        int columns = (w + step - 1) / step;
+        int[] rowHits = new int[rows];
+        int[] columnHits = new int[columns];
+        int count = 0;
+        double threshold = 44;
+        for (int y = 0, rowIndex = 0; y < h; y += step, rowIndex++) {
+            for (int x = 0, columnIndex = 0; x < w; x += step, columnIndex++) {
+                int[] rgb = image.rgbAt(x, y);
+                if (colourDistance(rgb, firstColour) <= threshold
+                        || colourDistance(rgb, secondColour) <= threshold) {
+                    count++;
+                    rowHits[rowIndex]++;
+                    columnHits[columnIndex]++;
+                }
+            }
+        }
+        double sampled = (double) rows * columns;
+        if (count / sampled < 0.35) {
+            return null;
+        }
+        int minX = -1;
+        int maxX = -1;
+        int minY = -1;
+        int maxY = -1;
+        int rowThreshold = Math.max(1, (int) (0.30 * columns));
+        int columnThreshold = Math.max(1, (int) (0.30 * rows));
+        for (int i = 0; i < rows; i++) {
+            if (rowHits[i] >= rowThreshold) {
+                if (minY < 0) minY = i * step;
+                maxY = Math.min(h - 1, i * step + step - 1);
+            }
+        }
+        for (int i = 0; i < columns; i++) {
+            if (columnHits[i] >= columnThreshold) {
+                if (minX < 0) minX = i * step;
+                maxX = Math.min(w - 1, i * step + step - 1);
+            }
+        }
+        if (maxX <= minX || maxY <= minY) {
+            return null;
+        }
+        double boxWidth = maxX - minX;
+        double boxHeight = maxY - minY;
+        if (boxWidth < 0.60 * w || boxHeight < 0.60 * h) {
+            return null;
+        }
+        if (Math.abs(boxWidth - boxHeight) > 0.06 * Math.max(boxWidth, boxHeight)) {
+            return null;
+        }
+        double pad = Math.max(1.0, 0.002 * Math.min(w, h));
+        BoardQuad quad = BoardQuad.rectangle(
+                Math.max(0, minX - pad), Math.max(0, minY - pad),
+                Math.min(w - 1, maxX + pad + 1), Math.min(h - 1, maxY + pad + 1));
+        double score = checkerboardScore(image, Homography.fromQuad(quad));
+        if (scale < 0.999) {
+            BoardQuad full = quad.scaled(1.0 / scale);
+            return new Detection(full, Homography.fromQuad(full), score, "square-colour");
+        }
+        return new Detection(quad, Homography.fromQuad(quad), score, "square-colour");
+    }
+
+    private static double[] binColour(int index) {
+        return new double[]{
+                ((index >> 8) & 0xf) * 16 + 8,
+                ((index >> 4) & 0xf) * 16 + 8,
+                (index & 0xf) * 16 + 8
+        };
+    }
+
+    private static double colourDistance(int[] rgb, double[] colour) {
+        double red = rgb[0] - colour[0];
+        double green = rgb[1] - colour[1];
+        double blue = rgb[2] - colour[2];
+        return Math.sqrt(red * red + green * green + blue * blue);
+    }
+
     private static Detection refine(RasterImage image, HoughDetector.Result hough, BoardQuad guess) {
         BoardQuad current = guess;
         Homography homography = Homography.fromQuad(current);
@@ -137,7 +332,13 @@ public final class BoardDetector {
                 System.out.printf("refine guess=%s pass=%d fitted=%s score=%.3f%n",
                         guess.describe(), pass, quadFromHomography(fitted, image).describe(), fittedScore);
             }
-            if (fittedScore >= score - 0.02) {
+            // A low-confidence guess is often a full-frame square that still
+            // contains the coordinate labels.  In that case let the grid lines
+            // replace it even when the raw checkerboard score drops, because
+            // the fitted grid is much more trustworthy than the initial guess.
+            boolean lowConfidenceGuess = score < 0.45;
+            if (fittedScore >= score - 0.02
+                    || (lowConfidenceGuess && fittedScore >= 0.30)) {
                 homography = fitted;
                 score = fittedScore;
                 current = quadFromHomography(fitted, image);
@@ -163,8 +364,13 @@ public final class BoardDetector {
     }
 
     private static LineGrid findLineGrid(HoughDetector.Result hough, RasterImage image) {
-        HoughLine[] vertical = bestSequence(hough.vertical, true, image);
-        HoughLine[] horizontal = bestSequence(hough.horizontal, false, image);
+        return findLineGrid(hough, image, false);
+    }
+
+    private static LineGrid findLineGrid(HoughDetector.Result hough, RasterImage image,
+                                         boolean allowLargeGrid) {
+        HoughLine[] vertical = bestSequence(hough.vertical, true, image, allowLargeGrid);
+        HoughLine[] horizontal = bestSequence(hough.horizontal, false, image, allowLargeGrid);
         if (vertical == null || horizontal == null) {
             return null;
         }
@@ -193,6 +399,11 @@ public final class BoardDetector {
 
     private static HoughLine[] bestSequence(List<HoughLine> candidates, boolean vertical,
                                             RasterImage image) {
+        return bestSequence(candidates, vertical, image, false);
+    }
+
+    private static HoughLine[] bestSequence(List<HoughLine> candidates, boolean vertical,
+                                            RasterImage image, boolean allowLargeGrid) {
         List<HoughLine> lines = new ArrayList<>();
         for (HoughLine line : candidates) {
             if (line.vertical == vertical) {
@@ -207,7 +418,9 @@ public final class BoardDetector {
         lines.sort(Comparator.comparingDouble(line -> line.positionAtCenter(centerX, centerY)));
         double dim = vertical ? image.getWidth() : image.getHeight();
         double minSpan = vertical ? 0.24 * dim : 0.28 * dim;
-        double maxSpan = vertical ? 0.82 * dim : 0.995 * dim;
+        double maxSpan = vertical
+                ? (allowLargeGrid ? 0.97 * dim : 0.82 * dim)
+                : 0.995 * dim;
 
         HoughLine[] best = null;
         double bestScore = -1;
@@ -456,6 +669,11 @@ public final class BoardDetector {
     }
 
     private static List<Sequence> findSequences(RasterImage image, boolean vertical) {
+        return findSequences(image, vertical, false);
+    }
+
+    private static List<Sequence> findSequences(RasterImage image, boolean vertical,
+                                                boolean allowLargeGrid) {
         int w = image.getWidth();
         int h = image.getHeight();
         int dim = vertical ? w : h;
@@ -528,10 +746,21 @@ public final class BoardDetector {
         if (peaks.size() < 4) {
             return List.of();
         }
-        double minSpan = vertical ? 0.30 * w : 0.50 * h;
-        double maxSpan = vertical ? 0.68 * w : 0.995 * h;
-        double minStep = (vertical ? 0.030 * w : 0.050 * h);
-        double maxStep = (vertical ? 0.090 * w : 0.130 * h);
+        double minSpan;
+        double maxSpan;
+        double minStep;
+        double maxStep;
+        if (allowLargeGrid) {
+            minSpan = vertical ? 0.30 * w : 0.35 * h;
+            maxSpan = vertical ? 0.96 * w : 0.995 * h;
+            minStep = (vertical ? 0.030 * w : 0.035 * h);
+            maxStep = (vertical ? 0.125 * w : 0.130 * h);
+        } else {
+            minSpan = vertical ? 0.30 * w : 0.50 * h;
+            maxSpan = vertical ? 0.68 * w : 0.995 * h;
+            minStep = (vertical ? 0.030 * w : 0.050 * h);
+            maxStep = (vertical ? 0.090 * w : 0.130 * h);
+        }
         List<Sequence> candidates = new ArrayList<>();
         double[] position = new double[9];
         for (int startPeak : peaks) {

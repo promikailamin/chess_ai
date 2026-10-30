@@ -1,0 +1,5 @@
+  processed 100/240 images
+  processed 200/240 images
+  processed 240/240 images
+Trained 36 templates from 240 images (4471 sprites, 0 rejected)
+Wrote /home/runner/work/chess_ai/chess_ai/.agent-work/tmp/lichess_trained3/manifest.csv

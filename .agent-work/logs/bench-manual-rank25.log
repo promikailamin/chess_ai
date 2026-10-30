@@ -1,0 +1,47 @@
+cases=157 exact=151 (96.2%) piece=10024/10048 (99.76%)
+  classic-flat         9/9
+  denim-3d             7/9
+  denim-flat           9/9
+  mahogany-3d          9/9
+  marble-3d            8/9
+  marble-bw-flat       9/9
+  marble-flat          9/9
+  oak-3d               9/9
+  ocean-3d             9/9
+  plaid-3d             9/9
+  plaid-flat           9/9
+  rustic-3d            9/10
+  teal-flat            9/9
+  walnut-flat          10/10
+  wood-3d              8/9
+  wood-flat            9/10
+  woodland-3d          10/10
+confusion expected->got:
+  . -> {P=1}
+  N -> {Q=1}
+  P -> {K=2, Q=2, R=1}
+  R -> {K=1}
+  b -> {p=2}
+  k -> {q=1}
+  n -> {k=3, q=1}
+  p -> {B=1, k=4, n=1, q=1}
+  r -> {k=1, p=1}
+failures:
+dataset/puzzles/puzzle_0046.jpg theme=denim-3d split=train pieces=63/64 conf=0.96
+  exp r1bq1bnr/pppp2p1/5k2/4p2p/3n4/4BP2/PPPQ1KPP/RN3BNR b - - 1 10
+  got r1bqkbnr/pppp2p1/5q2/4p2p/3n4/4BP2/PPPQ1KPP/RN3BNR w - - 0 1
+screenshots/Screenshot_2026-10-29-19-55-03-334_com.llx.chess.jpg theme=rustic-3d split=reference pieces=61/64 conf=0.91
+  exp rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1
+  got rnbqkbr1/1pp1nBpp/p2ppp2/7n/1PP1P2P/P2P1PP1/4P3/RNBQKBNR w KQq - 0 1
+screenshots/Screenshot_2026-10-29-19-55-18-000_com.llx.chess.jpg theme=wood-flat split=reference pieces=63/64 conf=0.82
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pppppppp/8/8/8/8/PPPPPPRP/RNBQKBNR w KQkq - 0 1
+screenshots/Screenshot_2026-10-29-20-02-47-190_com.llx.chess.jpg theme=marble-3d split=reference pieces=53/64 conf=0.86
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rqbqkbkr/pkqkpppp/8/8/8/8/QKQKPPPP/KQBQKBNR w Kkq - 0 1
+screenshots/Screenshot_2026-10-29-20-02-53-590_com.llx.chess.jpg theme=denim-3d split=reference pieces=60/64 conf=0.92
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got knpqkbkr/pppppppk/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk - 0 1
+screenshots/Screenshot_2026-10-29-20-03-02-796_com.llx.chess.jpg theme=wood-3d split=reference pieces=60/64 conf=0.91
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got pnpqkbkr/pppppppk/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk - 0 1

@@ -56,6 +56,7 @@ public final class PieceClassifier {
         double[] darkBackground;
         double[] whiteForeground;
         double[] blackForeground;
+        double pawnRerankArea = Double.NaN;
 
         ColorTheme(String name) {
             this.name = name;
@@ -158,6 +159,7 @@ public final class PieceClassifier {
             }
         }
         loadThemeStats();
+        loadThemeOptions();
     }
 
     private void loadThemeStats() {
@@ -201,6 +203,35 @@ public final class PieceClassifier {
                 };
             } catch (NumberFormatException ignored) {
                 // Ignore malformed statistics and fall back to template palettes.
+            }
+        }
+    }
+
+    private void loadThemeOptions() {
+        String options = source.text("/templates/" + templateDirectory + "/theme_options.csv");
+        if (options == null) {
+            return;
+        }
+        for (String line : options.split("\\R")) {
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("theme,")) {
+                continue;
+            }
+            String[] parts = line.split(",", -1);
+            if (parts.length < 2) {
+                continue;
+            }
+            ColorTheme theme = themes.get(parts[0].trim());
+            if (theme == null) {
+                continue;
+            }
+            try {
+                String value = parts[1].trim();
+                if (!value.isEmpty()) {
+                    theme.pawnRerankArea = Double.parseDouble(value);
+                }
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed options rather than disabling recognition.
             }
         }
     }
@@ -783,6 +814,8 @@ public final class PieceClassifier {
             return null;
         }
         ColorMatch best = null;
+        ColorMatch bestShape = null;
+        double bestShapeRank = -1;
         for (ColorTemplate template : theme.templates) {
             int dx = (int) Math.round((cell.bboxCenterX - template.bboxCenterX) / 2.0);
             int dy = (int) Math.round((cell.bboxCenterY - template.bboxCenterY) / 2.0);
@@ -795,10 +828,24 @@ public final class PieceClassifier {
                     continue;
                 }
                 ColorMatch current = score(cell, template, shiftX, shiftY);
-                if (current != null && (best == null || current.score > best.score)) {
-                    best = current;
+                if (current != null) {
+                    if (best == null || current.score > best.score) {
+                        best = current;
+                    }
+                    double rank = current.score + 0.25 * current.iou;
+                    if (rank > bestShapeRank) {
+                        bestShapeRank = rank;
+                        bestShape = current;
+                    }
                 }
             }
+        }
+        // The colour score ignores everything outside the template, so a narrow
+        // pawn template can beat a knight or rook.  Themes trained on real
+        // board images opt into a shape-aware rerank via theme_options.csv.
+        if (best != null && bestShape != null && !Double.isNaN(theme.pawnRerankArea)
+                && best.template.type == 1 && cell.area >= theme.pawnRerankArea) {
+            return bestShape;
         }
         return best;
     }

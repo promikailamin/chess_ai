@@ -1,0 +1,10 @@
+== chess-games (angeluriot/chess_games, MIT) -> dataset/external/chess_games
+  chess-games: 50 games, 98 positions
+  chess-games: 100 games, 197 positions
+  chess-games: 150 games, 297 positions
+  chess-games: 200 games, 397 positions
+  chess-games: 250 games, 497 positions
+  chess-games: 300 games, 596 positions
+  chess-games: 350 games, 696 positions
+  chess-games: 400 games, 796 positions
+Wrote 796 positions to dataset/external/chess_games/positions.json

@@ -1,0 +1,21 @@
+cases=320 exact=318 (99.4%) piece=20451/20480 (99.86%)
+  lichess-brown        318/320
+confusion expected->got:
+  . -> {K=7, R=1}
+  B -> {N=1}
+  N -> {K=1}
+  P -> {K=5}
+  Q -> {P=1}
+  R -> {N=2}
+  k -> {K=1}
+  n -> {K=2}
+  p -> {K=5}
+  q -> {K=1, k=1}
+  r -> {P=1}
+failures:
+dataset/external/lichess_boards/images/lichess-boards_train_107.jpg theme=lichess-brown split=train pieces=63/64 conf=0.83
+  exp 1r6/5k2/2Q1pNp1/p5Pp/1p2P2P/2P4R/KP3P2/3q4 b - - 0 1
+  got 1r6/5k2/2Q1pNp1/p5Pp/1p2P2P/2P4R/KP3P2/3k4 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_28.jpg theme=lichess-brown split=test pieces=36/64 conf=0.80
+  exp 6k1/1n1q1pBp/p1Np2p1/1p1P3n/1Pr3P1/3Q3P/P3RPK1/R7 b - - 0 1
+  got K1K1K1K1/1K1K1KNK/K1KpK1K1/1K1K1K1K/KKPRK1K1/3P3K/K3NPK1/Nk6 w - - 0 1

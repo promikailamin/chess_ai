@@ -1,0 +1,62 @@
+cases=320 exact=305 (95.3%) piece=20006/20480 (97.69%)
+  lichess-brown        305/320
+confusion expected->got:
+  . -> {K=57, P=1, R=68, b=29, n=9, r=1}
+  B -> {K=2, N=3, P=2, R=2, b=1, n=4, q=1}
+  K -> {B=2, N=3, b=2, n=4, q=2}
+  N -> {B=1, K=3, P=1, R=4, n=4}
+  P -> {B=1, K=17, N=9, R=11, b=2, n=23, q=11}
+  Q -> {K=2, N=1, P=1, b=1, n=7}
+  R -> {B=5, K=4, N=3, P=1, n=2, q=6}
+  b -> {K=3, P=2, n=13, p=1}
+  k -> {K=3, R=1, n=7, q=1, r=2}
+  n -> {K=3, N=1, P=1, p=1}
+  p -> {B=1, K=21, P=6, Q=1, b=1, n=54, r=5}
+  q -> {K=2, b=1, k=1, n=8, p=2}
+  r -> {B=1, K=1, P=2, R=1, n=10, p=4}
+failures:
+dataset/external/lichess_boards/images/lichess-boards_train_136.jpg theme=lichess-brown split=train pieces=25/64 conf=0.79
+  exp r1bqk2r/pp3ppp/4p3/3pPn2/1b1P1P2/2N5/PP4PP/R1BQKB1R w KQkq - 0 1
+  got n1npn2p/rn3nnn/Rb2nbR1/1R1nnnnR/Rn1n1nR1/1Rn3nR/Rn3bRb/qKnnnRkR w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_107.jpg theme=lichess-brown split=train pieces=63/64 conf=0.83
+  exp 1r6/5k2/2Q1pNp1/p5Pp/1p2P2P/2P4R/KP3P2/3q4 b - - 0 1
+  got 1r6/5k2/2Q1pNp1/p5Pp/1p2P2P/2P4R/KP3P2/3k4 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_19.jpg theme=lichess-brown split=train pieces=36/64 conf=0.78
+  exp 2r3k1/2r4p/4p1p1/1p1q1pP1/p2P1P1Q/P6R/4bB2/2R3K1 w - - 0 1
+  got 2r1R1r1/2nRnR1n/3nnbn1/1n1nbnnR/n2qRqRn/P6N/4nb2/k1B1K1b1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_197.jpg theme=lichess-brown split=train pieces=37/64 conf=0.78
+  exp 3r2k1/1q3ppp/p3p3/Qp1r4/7P/P4P2/1PP3P1/1K1R3R w - - 0 1
+  got R2rk1Rr/1n3nnb/r3n1R1/nn1n1RbR/Rb3bRn/P4q2/1Pq3q1/1q1qK2q w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_193.jpg theme=lichess-brown split=train pieces=35/64 conf=0.79
+  exp 2r3k1/p1Rb1ppp/2n1pn2/8/8/2P3P1/q4PBP/1rNQK2R w K - 0 1
+  got 2n1k1n1/r1Bn1nnn/2n1nn2/8/Rb3bR1/1Rq2RnR/nb3nqn/KnnnnRbR w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_95.jpg theme=lichess-brown split=train pieces=24/64 conf=0.80
+  exp r1b1qrk1/pp1n1pbp/2pp1np1/4P3/2P2B2/2NBPN1P/PP3PP1/R2Q1RK1 b - - 0 1
+  got K1K1KpK1/PK1K1KpK/K1KQKpK1/1K1KRK1K/K1K1KRK1/1KRKNK1K/KR3RK1/Rk1K1KN1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_226.jpg theme=lichess-brown split=train pieces=28/64 conf=0.79
+  exp 5rk1/5ppp/4b3/1p1pPpPP/2pP4/b1P5/rqNQKP2/2RRN3 w - - 0 1
+  got 4knn1/5nnn/Rb2nbR1/1n1nnnnR/R1nn2R1/nRn2RnR/rnPnNnR1/K1nRn1nR w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_train_56.jpg theme=lichess-brown split=train pieces=28/64 conf=0.78
+  exp r1b1k1nr/1pp2ppp/p1pb1q2/4p3/3PP3/5N2/PPP2PPP/RNBQ1RK1 w kq - 0 1
+  got n1n1n1nn/1nn2nnn/n1nn1n2/4n3/Rb1nRbR1/1R3RbR/RqRk1nRn/qRnnKRnR w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_validation_29.jpg theme=lichess-brown split=validation pieces=34/64 conf=0.79
+  exp 1R6/1p3p1k/p3bPpp/1p6/7P/8/r5P1/5R1K w - - 0 1
+  got 1P2R1R1/1n1Rnnnn/n2bnnnn/1n1RbRbR/3bRbRb/8/n5N1/k3Kq1q w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_validation_12.jpg theme=lichess-brown split=validation pieces=32/64 conf=0.78
+  exp 2r1k2r/2Bpq3/b2Q2p1/1p1pPp1p/7P/2P2P2/PPP3P1/2K4R w k - 0 1
+  got R1r1r1Rr/1RnnnRnR/nb1n1bn1/1n1nnnbn/Rb3bRn/2P2q2/NPq3q1/k1b1K2q w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_10.jpg theme=lichess-brown split=test pieces=31/64 conf=0.78
+  exp r1bq1rk1/5ppp/p3p3/np1pP3/3P3n/bPN1BN2/2B2PPP/2RQ1RK1 w - - 0 1
+  got n1nnkpn1/5nrn/nbR1n3/nnbnq3/R1Rn3n/nNn1nR2/R1N2nNn/1RnbKRn1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_0.jpg theme=lichess-brown split=test pieces=21/64 conf=0.80
+  exp r3k2r/ppb2p1p/2nqpp2/1B1p3b/Q2N4/7P/PP1N1PP1/R1B2RK1 b kq - 0 1
+  got B1KPK1Kp/PBPK1K1K/K1PpKnK1/1PKPR2K/NKKKK3/KKKKR2K/PK1B1NK1/KKKk1KN1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_23.jpg theme=lichess-brown split=test pieces=30/64 conf=0.79
+  exp r1b4r/p4k1p/2pb2pQ/3p1p2/1q1B4/2N5/PPP2PPP/R3R1K1 b - - 0 1
+  got R1K1k2r/r4q1K/2Kn2KQ/1KRK1K2/KbKNK3/1KNK1K1K/KRKRKNKN/BK1KB1B1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_38.jpg theme=lichess-brown split=test pieces=26/64 conf=0.81
+  exp r1b5/1p1pq1k1/p1n3p1/4Pp1p/P1B5/8/1P4PP/R2QR1K1 b - - 0 1
+  got P1P1k3/1P1Pn1n1/P1N3K1/KKKKBK1K/P1PRK3/KKRKRK1K/KKK1K1KN/KK1KBKB1 w - - 0 1
+dataset/external/lichess_boards/images/lichess-boards_test_28.jpg theme=lichess-brown split=test pieces=36/64 conf=0.80
+  exp 6k1/1n1q1pBp/p1Np2p1/1p1P3n/1Pr3P1/3Q3P/P3RPK1/R7 b - - 0 1
+  got K1K1K1K1/1K1K1KNK/K1KpK1K1/1K1K1K1K/KKPRK1K1/3P3K/K3NPK1/Nk6 w - - 0 1
