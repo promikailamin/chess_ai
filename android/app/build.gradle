@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.chessai.android'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.chessai.android'
+        minSdk 30
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java', '../../src/main/java']
+                exclude 'com/chessai/Main.java'
+                exclude 'com/chessai/sim/**'
+                exclude 'com/chessai/vision/ScreenshotAnalyzer.java'
+                exclude 'com/chessai/vision/ImageIoRaster.java'
+                exclude 'com/chessai/vision/AwtTemplateSource.java'
+            }
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE*', 'META-INF/NOTICE*']
+        }
+    }
+}
+
+def generatedAssetsDir = layout.buildDirectory.dir('generated/templateAssets').get().asFile
+def copyChessTemplates = tasks.register('copyChessTemplates', Copy) {
+    from rootProject.file('../src/main/resources/templates')
+    into new File(generatedAssetsDir, 'templates')
+}
+android.sourceSets.main.assets.srcDirs += [generatedAssetsDir]
+tasks.named('preBuild').configure { dependsOn(copyChessTemplates) }
+
+dependencies {
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+}

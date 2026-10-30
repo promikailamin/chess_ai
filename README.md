@@ -58,6 +58,37 @@ java -jar target/chess-ai-1.0.0.jar bench
 
 `perft 5` from the start position should report `4865609` nodes.
 
+## Android floating bot
+
+The `android/` directory contains a complete Android app that reuses the same
+engine, screenshot recognition and move planner. It targets Android 11+ and
+does not need root or a separate server.
+
+```bash
+cd android
+./gradlew :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+1. Open **Chess AI Bot** and enable the accessibility service, then return to
+   the app.
+2. Set the target package (default `com.llx.chess`) and open that chess app.
+3. Tap the floating pawn, choose whether the bot plays white or black and press
+   **Start**.
+4. The service reads the on-screen move indicator (for example
+   `1.White's Move`) from the accessibility tree, with an ML Kit screenshot-OCR
+   fallback. When it is the bot's turn it captures the display, recognises the
+   board with the shared vision pipeline, searches for a move and taps the
+   from/to squares with accessibility gestures.
+5. It waits while the opponent moves, handles a board that the chess app has
+   flipped for black, auto-promotes to a queen when the promotion dialog is
+   exposed as an accessibility node, and stops on checkmate, stalemate, a draw
+   or a win/loss message.
+
+The floating ball and control panel use an accessibility overlay, so the app
+stays out of the way while it is playing. The panel is hidden automatically
+when a game starts so it does not cover the board in screenshots.
+
 ## Recognition notes
 
 The classifier works best on the flat/vector-style board themes included in
@@ -69,8 +100,11 @@ rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 Rendered/3D themes (perspective pieces with shadows) are located geometrically,
 but the bundled classifier treats piece identification as best-effort. The
-templates live in `src/main/resources/templates/` and can be extended or
-regenerated with:
+built-in 2D/3D templates live in `src/main/resources/templates/`. Optional
+learned per-theme templates are loaded when
+`-Dchessai.classifier.learned=true` is set (they are off by default because
+some generated theme sets are noisier than the built-in silhouettes). Templates
+can be regenerated with:
 
 ```bash
 python3 tools/generate_templates.py
@@ -83,7 +117,9 @@ src/main/java/com/chessai/
   Main.java                 CLI entry point
   engine/                   board, move generation, search, evaluation
   vision/                   board detection, homography, piece classifier
+  autoplay/                 turn-text parsing, orientation and move planning
   sim/                      Swing simulator and self-play runner
+android/                        Android accessibility floating chess bot
 src/main/resources/templates/  2D and 3D piece templates
 src/test/java/                  JUnit 5 regression tests
 tools/generate_templates.py     template regeneration helper

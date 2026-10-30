@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="chess_green">#2E7D32</color>
+    <color name="chess_green_dark">#1B5E20</color>
+    <color name="chess_gold">#E8B44A</color>
+    <color name="chess_panel">#F21C1C1C</color>
+</resources>

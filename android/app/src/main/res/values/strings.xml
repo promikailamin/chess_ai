@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chess AI Bot</string>
+    <string name="accessibility_service_label">Chess AI floating bot</string>
+    <string name="accessibility_description">Shows a floating chess button, reads the move indicator from a supported chess app, recognizes the board and plays the bot moves.</string>
+    <string name="main_title">Chess AI Bot</string>
+    <string name="main_intro">Enable the accessibility service, open the supported chess app and tap the floating pawn. Choose white or black for the bot, then press Start.</string>
+    <string name="enable_accessibility">Open accessibility settings</string>
+    <string name="enable_overlay">Allow display over other apps</string>
+    <string name="open_game">Open chess app</string>
+    <string name="save_target">Save target package</string>
+    <string name="target_package">Target app package</string>
+    <string name="status_disabled">Accessibility service: disabled</string>
+    <string name="status_enabled">Accessibility service: enabled</string>
+    <string name="bot_color">Bot plays</string>
+    <string name="bot_white">White</string>
+    <string name="bot_black">Black</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="hide">Hide</string>
+    <string name="ready">Ready</string>
+    <string name="overlay_permission_missing">Overlay permission is not required on most devices; if the ball does not appear, allow display over other apps.</string>
+    <string name="saved">Saved</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ChessAI" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/chess_green</item>
+        <item name="android:colorPrimaryDark">@color/chess_green_dark</item>
+        <item name="android:colorAccent">@color/chess_gold</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:navigationBarColor">#1B1B1B</item>
+        <item name="android:statusBarColor">#1B1B1B</item>
+    </style>
+</resources>
