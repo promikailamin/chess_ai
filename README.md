@@ -120,10 +120,11 @@ piece confusions; the benchmark supplies manual board corners, so it does not
 measure automatic board detection.
 
 The bundled `lichess-brown` theme was trained from 240 real labelled Lichess
-screenshots. With automatic board detection it scores **319/320 exact
-positions (99.7%)** and **100.00% correct squares** on the held-out external
-set. The same run still scores 97.5% / 99.84% on the manual benchmark. The
-single remaining miss is a black queen classified as a king.
+screenshots. With automatic board detection it scores **40/40 exact positions
+(100%)** on the held-out test split and **319/320 (99.7%)** over the full
+external set. The manual benchmark remains at 97.5% exact / 99.84% squares.
+The single remaining miss in the full external set is a black queen
+classified as a king.
 
 ## Vision dataset and training
 
