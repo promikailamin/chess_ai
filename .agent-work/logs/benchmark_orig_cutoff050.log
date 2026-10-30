@@ -1,0 +1,133 @@
+cases=157 exact=123 (78.3%) piece=9857/20096 (49.05%)
+  classic-flat         6/9
+  denim-3d             0/9
+  denim-flat           0/9
+  mahogany-3d          8/9
+  marble-3d            8/9
+  marble-bw-flat       9/9
+  marble-flat          9/9
+  oak-3d               9/9
+  ocean-3d             9/9
+  plaid-3d             9/9
+  plaid-flat           9/9
+  rustic-3d            9/10
+  teal-flat            9/9
+  walnut-flat          10/10
+  wood-3d              0/9
+  wood-flat            9/10
+  woodland-3d          10/10
+confusion expected->got:
+  . -> {P=1}
+  B -> {N=1, r=1}
+  K -> {B=1, N=4, p=1}
+  N -> {B=6, P=1, q=6}
+  P -> {B=30, K=3, N=30, Q=2, q=27, r=1}
+  R -> {q=9, r=1}
+  b -> {p=8, r=1}
+  n -> {k=1, p=10}
+  p -> {K=1, b=2, k=2, n=2, q=11, r=3}
+  q -> {p=1}
+  r -> {.=8, k=3, p=5, q=8}
+failures:
+dataset/puzzles/puzzle_0006.jpg theme=classic-flat split=train pieces=63/64 conf=0.86
+  exp r1bk1br1/p4pp1/npqPp3/2B4p/PP3P1P/2NP1BP1/R1P2N2/2Q1KR2 b - - 0 25
+  got r1bk1br1/p4pp1/npqPp3/2B4p/PP3P1P/2NP1BP1/R1P2N2/K1Q1pR2 w - - 0 1
+dataset/puzzles/puzzle_0009.jpg theme=denim-flat split=train pieces=60/64 conf=0.85
+  exp 2k2bnr/rQ2pn2/4P1p1/p1p5/2b5/pP1P3p/P1K5/R4B2 b - - 5 40
+  got 2k2bnr/rQ2pn2/4q1p1/p1p5/2b5/pq1q3p/q1K5/R4B2 w - - 0 1
+dataset/puzzles/puzzle_0012.jpg theme=denim-3d split=train pieces=57/64 conf=0.83
+  exp r1b2knr/pp1p2b1/n7/2pPpppp/1PP2P2/8/RPQ1P1PP/1NBK1BNR w - - 4 16
+  got q1b2kn1/pq1q2b1/n7/2pPpqpq/1PN2P2/8/RPQ1P1PP/1NBK1BNR w - - 0 1
+dataset/puzzles/puzzle_0015.jpg theme=wood-3d split=train pieces=63/64 conf=0.91
+  exp r1bqkbr1/1pp1pppp/2np4/p7/8/NP5P/P1PnPK2/R1BQ1BNR w q - 0 10
+  got r1bqkbr1/1pp1pppp/2np4/p7/8/NP5P/P1PpPK2/R1BQ1BNR w q - 0 1
+dataset/puzzles/puzzle_0026.jpg theme=denim-flat split=train pieces=57/64 conf=0.86
+  exp 3k1b1r/3bppp1/4p2n/P1p3Pp/q2n1P1P/1R1r4/4P1B1/1QB1K2R b K - 6 27
+  got 3k1b1r/3bppp1/4p2n/B1p3Bp/q2n1B1B/1q1r4/4q1B1/1QB1K2q w - - 0 1
+dataset/puzzles/puzzle_0029.jpg theme=denim-3d split=train pieces=54/64 conf=0.84
+  exp r1b1k1nr/2ppbppp/1pn1p3/p7/2PqP1PQ/N4P2/PP2B2P/R1B1K1NR b KQkq - 0 11
+  got q1b1k1n1/2pqbppq/1pn1p3/p7/2NqN1NQ/N4N2/NP2B2N/R1B1K1NR w KQ - 0 1
+dataset/puzzles/puzzle_0032.jpg theme=wood-3d split=train pieces=62/64 conf=0.91
+  exp rn2kbnr/p2bp3/3q1p2/1ppp1pBp/3PP3/P5PP/1PP1N2R/1R1QKB2 b q - 1 17
+  got rn2kpnp/p2bp3/3q1p2/1ppp1pBp/3PP3/P5PP/1PP1N2R/1R1QKB2 w q - 0 1
+dataset/puzzles/puzzle_0043.jpg theme=denim-flat split=train pieces=54/64 conf=0.85
+  exp r1b2br1/pp1qp1p1/n1p1kp1p/1B1p4/PP1P4/B1PQnP1P/6P1/RN1K2NR w - - 0 14
+  got r1b2br1/pp1qp1p1/n1p1kp1p/1B1p4/qB1B4/B1BQnq1q/6q1/Rq1K2Bq w - - 0 1
+dataset/puzzles/puzzle_0046.jpg theme=denim-3d split=train pieces=58/64 conf=0.84
+  exp r1bq1bnr/pppp2p1/5k2/4p2p/3n4/4BP2/PPPQ1KPP/RN3BNR b - - 1 10
+  got q1bq1bnp/pqpq2p1/5k2/4p2q/3p4/4BP2/PPPQ1KPP/RN3BNR w - - 0 1
+dataset/puzzles/puzzle_0049.jpg theme=wood-3d split=train pieces=61/64 conf=0.91
+  exp 5bkr/3np2p/r4P1P/pp1PP1p1/PP1p2bn/2NKB3/1Q2P1B1/R5N1 w - - 2 33
+  got 5pk1/3np2p/r4P1P/pp1PP1p1/PP1p2bp/2NKB3/1Q2P1B1/R5N1 w - - 0 1
+dataset/puzzles/puzzle_0060.jpg theme=denim-flat split=train pieces=55/64 conf=0.85
+  exp r3kB1r/2Bn4/p1p2ppq/1pPp4/1P4bp/PR5P/N3P3/3QKBNR w Kkq - 2 18
+  got r3kB1r/2Bn4/p1p2ppq/1pBp4/1B4bp/Bq5q/q3q3/3QKBBq w kq - 0 1
+dataset/puzzles/puzzle_0063.jpg theme=denim-3d split=train pieces=51/64 conf=0.84
+  exp rn1qkb1r/1pp1ppp1/p7/3p1P1p/PPb5/B1P4P/1R1PP1Pn/1N1QKBN1 w kq - 3 11
+  got qn1qkp2/1pp1ppp1/p7/3p1N1p/NNb5/B1N4N/1R1NN1Nn/KN1QNNN1 w - - 0 1
+dataset/puzzles/puzzle_0066.jpg theme=wood-3d split=train pieces=63/64 conf=0.92
+  exp 1nbq1br1/3ppk1p/r5p1/Bp3p2/P2P1P2/1P2n1PP/2PKP2R/RN2QBN1 w - - 3 16
+  got 1nbq1br1/3ppk1p/r5p1/Bp3p2/P2P1P2/1P2p1PP/2PKP2R/RN2QBN1 w - - 0 1
+dataset/puzzles/puzzle_0077.jpg theme=denim-flat split=train pieces=56/64 conf=0.84
+  exp rB4nr/p1p2N2/5pk1/2qPQ3/P4b2/5P1P/1PbPK2R/2B3N1 w - - 5 32
+  got rB4nr/p1p2q2/5pk1/2qqQ3/q4b2/5q1q/1BbBK2R/2B3B1 w - - 0 1
+dataset/puzzles/puzzle_0080.jpg theme=denim-3d split=train pieces=57/64 conf=0.83
+  exp r1bk1bn1/pp2ppp1/2n5/1Ppp3p/1r2P2P/NRPq1N2/P1QP1PPR/B2K1B2 w - - 1 17
+  got q1bk1pn1/pp2ppp1/2n5/1Npp3p/1p2N2P/NRPq1N2/N1QP1PNR/B2K1B2 w - - 0 1
+dataset/puzzles/puzzle_0083.jpg theme=wood-3d split=train pieces=60/64 conf=0.91
+  exp r1b2b1r/pp1pk2N/2pN2pn/n4pRB/PP3p2/5P2/2PP3P/R1BQ1K2 b - - 0 21
+  got r1b2p2/pp1pk2N/2pN2pp/p4pRB/PP3p2/5P2/2PP3P/R1BQ1K2 w - - 0 1
+dataset/puzzles/puzzle_0094.jpg theme=denim-flat split=train pieces=59/64 conf=0.86
+  exp 5k2/n2B1r2/np2q3/8/1p2QPRp/4P2N/2b4P/4K3 b - - 0 41
+  got 5k2/n2B1r2/np2q3/8/1p2QBqp/4B2q/2b4B/4K3 w - - 0 1
+dataset/puzzles/puzzle_0097.jpg theme=denim-3d split=train pieces=52/64 conf=0.84
+  exp 4k1r1/n1pbq3/1p2pp1b/3P2p1/PnPPKBP1/5P1p/6BP/5RNR b - - 3 32
+  got 4k1q1/n1pbq3/1p2qp1p/3N2p1/NnNNNBN1/5N1q/6BN/4KRNR w - - 0 1
+dataset/puzzles/puzzle_0100.jpg theme=wood-3d split=train pieces=61/64 conf=0.91
+  exp 5r1r/n4p1k/R4P1p/1pBb2p1/1P4B1/2K5/4N2P/2N4R w - - 1 41
+  got 7p/p4p1k/R4P1p/1pBb2p1/1P4B1/2K5/4N2P/2N4R w - - 0 1
+dataset/puzzles/puzzle_0108.jpg theme=classic-flat split=validation pieces=63/64 conf=0.86
+  exp 4k1nr/1p2p1Q1/3P2P1/p1N2pPp/1pb2P2/P2P4/4NbKR/3R1B2 b - - 3 35
+  got 4k1nr/1p2p1Q1/3P2P1/p1N2pPp/1pb2P2/P2P4/4NbNR/3RKB2 w k - 0 1
+dataset/puzzles/puzzle_0111.jpg theme=denim-flat split=validation pieces=56/64 conf=0.83
+  exp 4k2r/2p5/n2b2Pn/1p2pq2/4p2P/2P1P1NP/PB6/R3KR2 b - - 6 37
+  got 4k2r/2p5/n2b2qn/1p2pq2/4p2B/2B1B1Bq/qB6/R3Kq2 w Qk - 0 1
+dataset/puzzles/puzzle_0114.jpg theme=denim-3d split=validation pieces=60/64 conf=0.82
+  exp 4r2r/4k3/1pp2Npn/2P2pN1/2Pp4/P3P1Pp/RPK2PRP/3Q1B2 w - - 0 32
+  got 4q3/4k3/1pp2Npp/2P2pN1/2Np4/P3P1Pp/RPK2PRP/3Q1B2 w - - 0 1
+dataset/puzzles/puzzle_0117.jpg theme=wood-3d split=validation pieces=62/64 conf=0.92
+  exp r1qk3r/p2b2pp/1Pp1p3/2np1p1n/1P1PPP1b/2P3P1/1RK3B1/1NB2QNR w - - 1 20
+  got r1qk3p/p2b2pp/1Pp1p3/2np1p1n/1P1PPP1p/2P3P1/1RK3B1/1NB2QNR w - - 0 1
+dataset/puzzles/puzzle_0125.jpg theme=classic-flat split=test pieces=63/64 conf=0.86
+  exp r1b1kb1r/1p1n1ppp/2np4/p1p1p3/2PP1PPq/BP6/P1QNP2P/R2K1BNR b kq - 3 12
+  got r1b1kb1r/1p1n1ppp/2np4/p1p1p3/2PP1PPq/BP6/P1QNP2P/R2NKBNR w kq - 0 1
+dataset/puzzles/puzzle_0128.jpg theme=denim-flat split=test pieces=54/64 conf=0.83
+  exp r3kb1r/p1n1n1p1/4pp2/2p4p/bp2P3/R4P1P/1PPP1KP1/1NB2QNR w kq - 0 14
+  got r3kb1r/p1n1n1p1/4pp2/2p4p/bp2q3/R4q1q/1BqB1Kq1/1qB2QBq w kq - 0 1
+dataset/puzzles/puzzle_0131.jpg theme=denim-3d split=test pieces=58/64 conf=0.83
+  exp rnbk1qnr/2pp1p2/1p2P3/pB4pP/8/P1P1P2N/2P4P/R1B1K1QR w - - 1 16
+  got qpbk1qnk/2pp1p2/1p2N3/pB4pN/8/P1P1P2N/2N4P/R1B1K1QR w KQ - 0 1
+dataset/puzzles/puzzle_0134.jpg theme=wood-3d split=test pieces=63/64 conf=0.92
+  exp rnb1k2r/ppp2pqp/3pp1pn/8/2P2QP1/2NP4/PP2PP1P/R1BK1BNR w kq - 5 10
+  got rnb1k3/ppp2pqp/3pp1pn/8/2P2QP1/2NP4/PP2PP1P/R1BK1BNR w q - 0 1
+screenshots/Screenshot_2026-10-29-19-55-03-334_com.llx.chess.jpg theme=rustic-3d split=reference pieces=61/64 conf=0.89
+  exp rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1
+  got rnbqkbr1/1pp1nKpp/p2ppp2/7n/1PP1P2P/P2P1PP1/4P3/RNBQKBNR w KQq - 0 1
+screenshots/Screenshot_2026-10-29-19-55-18-000_com.llx.chess.jpg theme=wood-flat split=reference pieces=62/64 conf=0.83
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pppppnrp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+screenshots/Screenshot_2026-10-29-20-02-34-601_com.llx.chess.jpg theme=denim-flat split=reference pieces=53/64 conf=0.82
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pppppppp/8/8/8/8/qBqBqBqB/RqBQKBBq w Qkq - 0 1
+screenshots/Screenshot_2026-10-29-20-02-47-190_com.llx.chess.jpg theme=marble-3d split=reference pieces=43/64 conf=0.83
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rkrpkppk/prprpkpk/8/8/8/8/KrKBBBPK/rPrQBBNR w q - 0 1
+screenshots/Screenshot_2026-10-29-20-02-53-590_com.llx.chess.jpg theme=denim-3d split=reference pieces=61/64 conf=0.84
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pppppppp/8/8/8/8/PPPPQPBQ/RNBQKBNR w KQkq - 0 1
+screenshots/Screenshot_2026-10-29-20-03-02-796_com.llx.chess.jpg theme=wood-3d split=reference pieces=61/64 conf=0.89
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnk/ppppppbp/8/8/8/8/PPPPPPPB/RNBQKBNR w KQq - 0 1
+screenshots/Screenshot_2026-10-29-20-03-05-802_com.llx.chess.jpg theme=mahogany-3d split=reference pieces=62/64 conf=0.87
+  exp rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  got rnbqkbnr/pbpppppp/8/8/8/8/PPPPPPPB/RNBQKBNR w KQkq - 0 1

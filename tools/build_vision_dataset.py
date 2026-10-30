@@ -225,7 +225,7 @@ def build_reference(reference: dict, crop: float = 1.0
         sprite = median_sprite(values)
         sprites[color][piece_type] = sprite
         cv2.imwrite(os.path.join(theme_dir, f"{color}_{piece_type}.png"),
-                    cv2.cvtColor(sprite.rgba(), cv2.COLOR_RGBA2BGRA))
+                    sprite.rgba())
     return sprites, backgrounds
 
 
@@ -396,6 +396,8 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=20261030)
     parser.add_argument("--count", type=int, default=140)
     parser.add_argument("--clean", action="store_true", help="remove previously generated puzzles")
+    parser.add_argument("--crop", type=float, default=None,
+                        help="force one sprite crop fraction for every reference")
     args = parser.parse_args()
 
     if args.clean:
@@ -415,7 +417,7 @@ def main() -> None:
 
     print(f"Extracting pieces from {len(manifest['references'])} reference screenshots")
     for reference in manifest["references"]:
-        crop = choose_crop(reference)
+        crop = args.crop if args.crop is not None else choose_crop(reference)
         reference["crop"] = crop
         sprites, backgrounds = build_reference(reference, crop)
         all_sprites[reference["theme"]] = sprites

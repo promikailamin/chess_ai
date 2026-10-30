@@ -1,0 +1,448 @@
+{
+  "version": 1,
+  "initial_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "references": [
+    {
+      "id": "19-54-31-538",
+      "file": "screenshots/Screenshot_2026-10-29-19-54-31-538_com.llx.chess.jpg",
+      "theme": "woodland-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          753,
+          62
+        ],
+        [
+          1754,
+          60
+        ],
+        [
+          1911,
+          1030
+        ],
+        [
+          600,
+          1028
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "19-55-03-334",
+      "file": "screenshots/Screenshot_2026-10-29-19-55-03-334_com.llx.chess.jpg",
+      "theme": "rustic-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          754,
+          58
+        ],
+        [
+          1764,
+          58
+        ],
+        [
+          1905,
+          1029
+        ],
+        [
+          592,
+          1029
+        ]
+      ],
+      "fen": "rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "19-55-18-000",
+      "file": "screenshots/Screenshot_2026-10-29-19-55-18-000_com.llx.chess.jpg",
+      "theme": "wood-flat",
+      "style": "flat",
+      "quad": [
+        [
+          750,
+          8
+        ],
+        [
+          1762,
+          25
+        ],
+        [
+          1760,
+          1071
+        ],
+        [
+          751,
+          1045
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-09-026",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-09-026_com.llx.chess.jpg",
+      "theme": "walnut-flat",
+      "style": "flat",
+      "quad": [
+        [
+          752,
+          41
+        ],
+        [
+          1759,
+          27
+        ],
+        [
+          1758,
+          1041
+        ],
+        [
+          753,
+          1038
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-12-688",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-12-688_com.llx.chess.jpg",
+      "theme": "teal-flat",
+      "style": "flat",
+      "quad": [
+        [
+          751,
+          35
+        ],
+        [
+          1756,
+          36
+        ],
+        [
+          1756,
+          1038
+        ],
+        [
+          751,
+          1039
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-15-954",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-15-954_com.llx.chess.jpg",
+      "theme": "classic-flat",
+      "style": "flat",
+      "quad": [
+        [
+          752,
+          34
+        ],
+        [
+          1756,
+          34
+        ],
+        [
+          1756,
+          1039
+        ],
+        [
+          752,
+          1039
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-19-616",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-19-616_com.llx.chess.jpg",
+      "theme": "plaid-flat",
+      "style": "flat",
+      "quad": [
+        [
+          752,
+          34
+        ],
+        [
+          1756,
+          34
+        ],
+        [
+          1756,
+          1039
+        ],
+        [
+          752,
+          1039
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-26-845",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-26-845_com.llx.chess.jpg",
+      "theme": "marble-flat",
+      "style": "flat",
+      "quad": [
+        [
+          751,
+          64
+        ],
+        [
+          1760,
+          64
+        ],
+        [
+          1760,
+          1029
+        ],
+        [
+          751,
+          1029
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-34-601",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-34-601_com.llx.chess.jpg",
+      "theme": "denim-flat",
+      "style": "flat",
+      "quad": [
+        [
+          752,
+          33
+        ],
+        [
+          1757,
+          33
+        ],
+        [
+          1757,
+          1042
+        ],
+        [
+          752,
+          1042
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-42-284",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-42-284_com.llx.chess.jpg",
+      "theme": "marble-bw-flat",
+      "style": "flat",
+      "quad": [
+        [
+          753,
+          34
+        ],
+        [
+          1756,
+          34
+        ],
+        [
+          1757,
+          1038
+        ],
+        [
+          752,
+          1038
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-47-190",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-47-190_com.llx.chess.jpg",
+      "theme": "marble-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          719,
+          42
+        ],
+        [
+          1764,
+          56
+        ],
+        [
+          1903,
+          1018
+        ],
+        [
+          636,
+          1018
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-53-590",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-53-590_com.llx.chess.jpg",
+      "theme": "denim-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          747,
+          56
+        ],
+        [
+          1765,
+          65
+        ],
+        [
+          1903,
+          1022
+        ],
+        [
+          603,
+          1021
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-56-786",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-56-786_com.llx.chess.jpg",
+      "theme": "ocean-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          747,
+          55
+        ],
+        [
+          1765,
+          65
+        ],
+        [
+          1903,
+          1021
+        ],
+        [
+          603,
+          1021
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-02-59-897",
+      "file": "screenshots/Screenshot_2026-10-29-20-02-59-897_com.llx.chess.jpg",
+      "theme": "plaid-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          757,
+          58
+        ],
+        [
+          1765,
+          63
+        ],
+        [
+          1904,
+          1022
+        ],
+        [
+          591,
+          1022
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-03-02-796",
+      "file": "screenshots/Screenshot_2026-10-29-20-03-02-796_com.llx.chess.jpg",
+      "theme": "wood-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          747,
+          54
+        ],
+        [
+          1765,
+          68
+        ],
+        [
+          1903,
+          1021
+        ],
+        [
+          603,
+          1021
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-03-05-802",
+      "file": "screenshots/Screenshot_2026-10-29-20-03-05-802_com.llx.chess.jpg",
+      "theme": "mahogany-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          737,
+          53
+        ],
+        [
+          1764,
+          67
+        ],
+        [
+          1903,
+          1022
+        ],
+        [
+          608,
+          1021
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    },
+    {
+      "id": "20-03-09-608",
+      "file": "screenshots/Screenshot_2026-10-29-20-03-09-608_com.llx.chess.jpg",
+      "theme": "oak-3d",
+      "style": "rendered",
+      "quad": [
+        [
+          757,
+          56
+        ],
+        [
+          1771,
+          65
+        ],
+        [
+          1900,
+          1021
+        ],
+        [
+          592,
+          1021
+        ]
+      ],
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "crop": 1.0
+    }
+  ]
+}

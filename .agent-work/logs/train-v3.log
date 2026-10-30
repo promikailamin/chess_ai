@@ -1,0 +1,13 @@
+  processed 100/100 images
+Traceback (most recent call last):
+  File "/home/runner/work/chess_ai/chess_ai/tools/train_vision_model.py", line 315, in <module>
+    main()
+  File "/home/runner/work/chess_ai/chess_ai/tools/train_vision_model.py", line 309, in main
+    train(os.path.abspath(args.labels), os.path.abspath(args.out),
+  File "/home/runner/work/chess_ai/chess_ai/tools/train_vision_model.py", line 252, in train
+    theme_rows.append([
+                      ^
+  File "/home/runner/work/chess_ai/chess_ai/tools/train_vision_model.py", line 254, in <genexpr>
+    *(f"{value:.2f}" for value in light),
+        ^^^^^^^^^^^
+TypeError: unsupported format string passed to numpy.ndarray.__format__

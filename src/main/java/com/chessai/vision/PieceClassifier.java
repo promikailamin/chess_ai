@@ -20,7 +20,7 @@ import java.util.Map;
 public final class PieceClassifier {
     private static final int PATCH = 96;
     private static final int MATCH = 48;
-    private static final double ALPHA_CUTOFF = 0.25;
+    private static final double ALPHA_CUTOFF = 0.5;
 
     private static final String[] TYPE_NAMES = {
             null, "pawn", "knight", "bishop", "rook", "queen", "king"
@@ -52,9 +52,17 @@ public final class PieceClassifier {
         final List<ColorTemplate> templates = new ArrayList<>();
         final List<double[]> backgrounds = new ArrayList<>();
         final List<double[]> foregrounds = new ArrayList<>();
+        double[] lightBackground;
+        double[] darkBackground;
+        double[] whiteForeground;
+        double[] blackForeground;
 
         ColorTheme(String name) {
             this.name = name;
+        }
+
+        boolean hasStats() {
+            return lightBackground != null;
         }
     }
 
@@ -92,6 +100,7 @@ public final class PieceClassifier {
 
     private final Map<String, ColorTheme> themes = new LinkedHashMap<>();
     private final TemplateSource source;
+    private final String templateDirectory;
     private String chosenTheme = "color";
 
     public PieceClassifier(TemplateSource source) {
@@ -99,11 +108,12 @@ public final class PieceClassifier {
             throw new IllegalArgumentException("Template source is required");
         }
         this.source = source;
+        this.templateDirectory = System.getProperty("chessai.templates", "color").trim();
         loadTemplates();
     }
 
     private void loadTemplates() {
-        String manifest = source.text("/templates/color/manifest.csv");
+        String manifest = source.text("/templates/" + templateDirectory + "/manifest.csv");
         if (manifest == null) {
             return;
         }
@@ -120,7 +130,7 @@ public final class PieceClassifier {
                 String themeName = parts[0].trim();
                 int type = Integer.parseInt(parts[1].trim());
                 int color = Integer.parseInt(parts[2].trim());
-                String resource = "/templates/color/" + parts[3].trim();
+                String resource = "/templates/" + templateDirectory + "/" + parts[3].trim();
                 double[] background = {
                         Double.parseDouble(parts[4].trim()),
                         Double.parseDouble(parts[5].trim()),
@@ -145,6 +155,52 @@ public final class PieceClassifier {
                 theme.foregrounds.add(foreground);
             } catch (NumberFormatException ignored) {
                 // Skip malformed manifest rows rather than disabling recognition.
+            }
+        }
+        loadThemeStats();
+    }
+
+    private void loadThemeStats() {
+        String stats = source.text("/templates/" + templateDirectory + "/theme_stats.csv");
+        if (stats == null) {
+            return;
+        }
+        for (String line : stats.split("\\R")) {
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("theme,")) {
+                continue;
+            }
+            String[] parts = line.split(",", -1);
+            if (parts.length < 13) {
+                continue;
+            }
+            try {
+                ColorTheme theme = themes.get(parts[0].trim());
+                if (theme == null) {
+                    continue;
+                }
+                theme.lightBackground = new double[]{
+                        Double.parseDouble(parts[1].trim()),
+                        Double.parseDouble(parts[2].trim()),
+                        Double.parseDouble(parts[3].trim())
+                };
+                theme.darkBackground = new double[]{
+                        Double.parseDouble(parts[4].trim()),
+                        Double.parseDouble(parts[5].trim()),
+                        Double.parseDouble(parts[6].trim())
+                };
+                theme.whiteForeground = new double[]{
+                        Double.parseDouble(parts[7].trim()),
+                        Double.parseDouble(parts[8].trim()),
+                        Double.parseDouble(parts[9].trim())
+                };
+                theme.blackForeground = new double[]{
+                        Double.parseDouble(parts[10].trim()),
+                        Double.parseDouble(parts[11].trim()),
+                        Double.parseDouble(parts[12].trim())
+                };
+            } catch (NumberFormatException ignored) {
+                // Ignore malformed statistics and fall back to template palettes.
             }
         }
     }
@@ -296,6 +352,11 @@ public final class PieceClassifier {
             chosenTheme = "none";
             return null;
         }
+        String forced = System.getProperty("chessai.forceTheme", "").trim();
+        if (!forced.isEmpty() && themes.containsKey(forced)) {
+            chosenTheme = forced;
+            return themes.get(forced);
+        }
         List<ColorTheme> candidates = rankThemes(cells);
         ColorTheme best = null;
         double bestScore = -1;
@@ -356,15 +417,24 @@ public final class PieceClassifier {
 
         List<ThemeScore> scores = new ArrayList<>();
         for (ColorTheme theme : themes.values()) {
-            double backgroundScore = (nearest(darkBackground, theme.backgrounds)
-                    + nearest(lightBackground, theme.backgrounds)) / 2.0;
-            double foregroundScore = (nearest(lightForeground, theme.foregrounds)
-                    + nearest(darkForeground, theme.foregrounds)) / 2.0;
+            double backgroundScore;
+            double foregroundScore;
+            if (theme.hasStats()) {
+                backgroundScore = (distance(darkBackground, theme.darkBackground)
+                        + distance(lightBackground, theme.lightBackground)) / 2.0;
+                foregroundScore = (distance(darkForeground, theme.blackForeground)
+                        + distance(lightForeground, theme.whiteForeground)) / 2.0;
+            } else {
+                backgroundScore = (nearest(darkBackground, theme.backgrounds)
+                        + nearest(lightBackground, theme.backgrounds)) / 2.0;
+                foregroundScore = (nearest(lightForeground, theme.foregrounds)
+                        + nearest(darkForeground, theme.foregrounds)) / 2.0;
+            }
             scores.add(new ThemeScore(theme, backgroundScore * 0.45 + foregroundScore * 0.55));
         }
         scores.sort(Comparator.comparingDouble(score -> score.score));
         List<ColorTheme> result = new ArrayList<>();
-        int limit = Math.min(5, scores.size());
+        int limit = scores.size();
         for (int i = 0; i < limit; i++) {
             result.add(scores.get(i).theme);
         }
@@ -400,6 +470,13 @@ public final class PieceClassifier {
             return new double[]{cell.backgroundR, cell.backgroundG, cell.backgroundB};
         }
         return new double[]{red / count, green / count, blue / count};
+    }
+
+    private static double distance(double[] first, double[] second) {
+        double dr = first[0] - second[0];
+        double dg = first[1] - second[1];
+        double db = first[2] - second[2];
+        return Math.sqrt(dr * dr + dg * dg + db * db);
     }
 
     private static double nearest(double[] color, List<double[]> palette) {

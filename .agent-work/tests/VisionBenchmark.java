@@ -27,18 +27,18 @@ public class VisionBenchmark {
                 } else r=ScreenshotAnalyzer.analyze(new File(image));
             } catch (Exception e) { failures.add(image+" CRASH "+e); total++; continue; }
             Position expected=Position.fromFen(fen);
-            int pe=0,pc=0;
+            int pc=0;
             char[][] es=toChars(expected), as=r.squares;
             for(int y=0;y<8;y++)for(int x=0;x<8;x++){
                 char e=es[y][x], a=as[y][x];
-                pe++; pieceTotal++;
+                pieceTotal++;
                 if(e==a)pc++;
                 if(e!=a){
                     confusion.computeIfAbsent(e,k->new TreeMap<>()).merge(a,1,Integer::sum);
                 }
             }
-            pieceCorrect+=pc; pieceTotal+=pe;
-            boolean ok = pc==pe;
+            pieceCorrect+=pc;
+            boolean ok = pc==64;
             if(ok) exact++;
             int[] t=themes.computeIfAbsent(theme,k->new int[2]); t[0]++; if(ok)t[1]++;
             total++;

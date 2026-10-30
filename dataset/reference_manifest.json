@@ -52,7 +52,7 @@
         ]
       ],
       "fen": "rnbqkbr1/1pp1pppp/p2ppp2/7n/1PP1P2P/P2P1PP1/8/RNBQKBNR w KQ - 0 1",
-      "crop": 0.85
+      "crop": 1.0
     },
     {
       "id": "19-55-18-000",
@@ -78,7 +78,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.8
+      "crop": 1.0
     },
     {
       "id": "20-02-09-026",
@@ -130,7 +130,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.55
+      "crop": 1.0
     },
     {
       "id": "20-02-15-954",
@@ -156,7 +156,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.75
+      "crop": 1.0
     },
     {
       "id": "20-02-19-616",
@@ -182,7 +182,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.75
+      "crop": 1.0
     },
     {
       "id": "20-02-26-845",
@@ -234,7 +234,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.55
+      "crop": 1.0
     },
     {
       "id": "20-02-42-284",
@@ -260,7 +260,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.55
+      "crop": 1.0
     },
     {
       "id": "20-02-47-190",
@@ -312,7 +312,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.55
+      "crop": 1.0
     },
     {
       "id": "20-02-56-786",
@@ -338,7 +338,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.75
+      "crop": 1.0
     },
     {
       "id": "20-02-59-897",
@@ -390,7 +390,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.55
+      "crop": 1.0
     },
     {
       "id": "20-03-05-802",
@@ -416,7 +416,7 @@
         ]
       ],
       "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      "crop": 0.7
+      "crop": 1.0
     },
     {
       "id": "20-03-09-608",
