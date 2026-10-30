@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "source": "chess-games",
+  "dataset": "angeluriot/chess_games",
+  "license": "MIT",
+  "license_url": "https://github.com/angeluriot/Chess_games",
+  "generated_at": "2026-10-30T09:13:07.323963+00:00",
+  "images": [],
+  "positions": [],
+  "games": 400,
+  "count": 796
+}

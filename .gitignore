@@ -28,3 +28,12 @@ android/local.properties
 .agent-work/tmp/ref_labels.json
 .agent-work/tmp/download-internet.pid
 .agent-work/outputs/internet_overlays/
+.agent-work/tmp/hf_chess_images/
+.agent-work/tmp/lichess_trained/
+.agent-work/tmp/lichess_trained3/
+.agent-work/tmp/external_test/
+.agent-work/tmp/vision_external_test/
+.agent-work/tmp/angeluriot_Chess_games/
+.agent-work/tmp/test_label_sample.tsv
+.agent-work/tmp/ScoreQuad.java
+.agent-work/tmp/*.bak

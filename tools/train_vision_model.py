@@ -68,7 +68,10 @@ class TrainingStats:
 def load_labels(path: str) -> list[dict]:
     if path.endswith(".json"):
         with open(path, encoding="utf-8") as handle:
-            return json.load(handle)
+            data = json.load(handle)
+        if isinstance(data, dict):
+            data = data.get("labels") or data.get("images") or []
+        return data
     rows = []
     with open(path, newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):

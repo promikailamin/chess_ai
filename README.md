@@ -119,6 +119,12 @@ screenshots) the bundled `color` templates score **97.5% exact positions** and
 piece confusions; the benchmark supplies manual board corners, so it does not
 measure automatic board detection.
 
+The bundled `lichess-brown` theme was trained from 240 real labelled Lichess
+screenshots. With automatic board detection it scores **319/320 exact
+positions (99.7%)** and **100.00% correct squares** on the held-out external
+set. The same run still scores 97.5% / 99.84% on the manual benchmark. The
+single remaining miss is a black queen classified as a king.
+
 ## Vision dataset and training
 
 The reproducible vision tooling lives in `tools/`:
@@ -152,6 +158,42 @@ java -cp target/classes:.agent-work/tmp \
     -Dchessai.templates.dir=src/main/resources/templates/color \
     VisionBenchmark --manual .agent-work/tmp/vision_dataset/test_cases.tsv
 ```
+
+### External labelled datasets
+
+`tools/download_hf_chess_datasets.py` downloads and converts data from the
+Hugging Face datasets server without extra dependencies:
+
+```bash
+# 320 real Lichess board images (240 train / 40 validation / 40 test).
+python3 tools/download_hf_chess_datasets.py --source lichess-boards \
+    --splits train --limit 240,40,40 --out dataset/external
+
+# 799 real FEN positions sampled from angeluriot/chess_games (MIT).
+python3 tools/download_hf_chess_datasets.py --source chess-games \
+    --splits train --limit 400 --positions-per-game 2 \
+    --out dataset/external
+
+# Optional board-to-FEN dataset (CC-BY-NC-4.0, non-commercial use only).
+python3 tools/download_hf_chess_datasets.py --source board-to-fen \
+    --splits train --limit 100 --out dataset/external
+```
+
+The downloader writes `labels.json`/`positions.json` plus licence metadata.
+`dataset/external/lichess_boards` is committed so the automatic-detection
+regression tests and benchmarks are reproducible. The `chess-games` positions
+can be fed to the screenshot generator:
+
+```bash
+python3 tools/build_vision_dataset.py --count 400 \
+    --dataset-dir .agent-work/tmp/vision_positions \
+    --templates-dir .agent-work/tmp/vision_positions/learned \
+    --positions dataset/external/chess_games/positions.json
+```
+
+`tools/merge_template_sets.py` merges a trained theme directory into the
+bundled `color` template set, including `manifest.csv`, `theme_stats.csv` and
+the optional per-theme `theme_options.csv` shape-rerank threshold.
 
 `--exemplars 1` selects the median sprite. Using several noisy exemplars per
 piece makes the matcher worse (39% vs 99% exact on the strong-augmented test
@@ -196,10 +238,13 @@ src/main/resources/templates/  2D and 3D piece templates
 src/test/java/                  JUnit 5 regression tests
 tools/generate_templates.py     template regeneration helper
 tools/download_chess_images.py  Wikimedia Commons image downloader
+tools/download_hf_chess_datasets.py Hugging Face board/position downloader
 tools/build_vision_dataset.py   labelled screenshot generator
 tools/train_vision_model.py     per-theme template trainer
+tools/merge_template_sets.py    merge trained themes into the runtime set
 tools/export_color_templates.py export sprites as runtime colour templates
 tools/requirements-vision.txt   optional Python tooling dependencies
 dataset/                        reference manifests, labels and piece sprites
+dataset/external/               labelled Lichess images and real FEN positions
 screenshots/                    reference screenshots
 ```

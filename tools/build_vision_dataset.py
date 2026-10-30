@@ -306,6 +306,31 @@ def write_learned_templates(reference: dict, sprites: dict[str, dict[str, Sprite
     return rows
 
 
+def load_positions(path: str) -> list[str]:
+    """Load FENs from a positions file or a plain newline-separated list."""
+    if not path:
+        return []
+    with open(path, encoding="utf-8") as handle:
+        if path.endswith(".json"):
+            data = json.load(handle)
+            if isinstance(data, dict):
+                data = data.get("positions", [])
+            fens = [entry.get("fen") if isinstance(entry, dict) else entry
+                    for entry in data]
+        else:
+            fens = [line.strip() for line in handle if line.strip()]
+    valid = []
+    for fen in fens:
+        if not fen:
+            continue
+        try:
+            chess.Board(fen)
+        except ValueError:
+            continue
+        valid.append(fen)
+    return valid
+
+
 def random_position(rng: random.Random, min_plies: int = 8, max_plies: int = 84) -> chess.Board:
     for _ in range(200):
         board = chess.Board()
@@ -423,6 +448,10 @@ def main() -> None:
                         help="number of validation puzzles")
     parser.add_argument("--augment", choices=["normal", "strong"], default="normal",
                         help="screenshot augmentation strength")
+    parser.add_argument("--positions", default="",
+                        help="optional JSON/newline list of real FENs "
+                             "(for example from tools/download_hf_chess_datasets.py "
+                             "--source chess-games)")
     parser.add_argument("--jpeg-quality", type=int, default=0,
                         help="fixed JPEG quality; 0 chooses 62-92 when strong")
     args = parser.parse_args()
@@ -443,6 +472,9 @@ def main() -> None:
 
     manifest = json.load(open(args.reference_manifest, encoding="utf-8"))
     rng = random.Random(args.seed)
+    external_positions = load_positions(args.positions)
+    if external_positions:
+        print(f"Using {len(external_positions)} external positions from {args.positions}")
 
     all_sprites: dict[str, dict[str, dict[str, Sprite]]] = {}
     all_backgrounds: dict[str, dict[int, np.ndarray]] = {}
@@ -493,7 +525,10 @@ def main() -> None:
             split = "test"
         reference = references[index % len(references)]
         theme = reference["theme"]
-        board = random_position(rng)
+        if external_positions:
+            board = chess.Board(rng.choice(external_positions))
+        else:
+            board = random_position(rng)
         rendered = render_position(board, all_sprites[theme], all_backgrounds[theme],
                                    rng, strong)
         screenshot, quad = paste_board(reference, rendered, rng, strong)
