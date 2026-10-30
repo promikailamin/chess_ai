@@ -1,0 +1,3 @@
+[main 770f723] Package vision assets and rebuild Android debug APK
+ 4 files changed, 4 insertions(+), 1 deletion(-)
+ create mode 100644 .agent-work/outputs/chess-ai-android-debug.apk.sha256
