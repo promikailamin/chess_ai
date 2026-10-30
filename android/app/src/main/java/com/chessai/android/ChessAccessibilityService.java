@@ -38,6 +38,7 @@ public final class ChessAccessibilityService extends AccessibilityService {
     public static final String DEFAULT_TARGET_PACKAGE = "com.llx.chess";
 
     private static final long POLL_INTERVAL_MS = 950;
+    private static final long MOVE_SETTLE_MS = 1400;
     private static final int SEARCH_TIME_MS = 1500;
     private static final double MIN_CONFIDENCE = 0.42;
 
@@ -48,10 +49,11 @@ public final class ChessAccessibilityService extends AccessibilityService {
     private FloatingChessOverlay overlay;
     private AndroidVision vision;
     private ScreenTextReader textReader;
-    private AutoPlaySession session;
+    private volatile AutoPlaySession session;
     private volatile boolean running;
-    private int botColor = Piece.BLACK;
+    private volatile int botColor = Piece.BLACK;
     private long lastEventSchedule;
+    private volatile long movePendingUntil;
 
     private final Runnable pollRunnable = new Runnable() {
         @Override
@@ -137,6 +139,7 @@ public final class ChessAccessibilityService extends AccessibilityService {
     private void startBot(int color) {
         botColor = color;
         session = new AutoPlaySession(color, 16, 64, SEARCH_TIME_MS, 2, 4500);
+        movePendingUntil = 0;
         running = true;
         if (overlay != null) {
             overlay.setRunning(true);
@@ -149,6 +152,7 @@ public final class ChessAccessibilityService extends AccessibilityService {
     private void stopBot(String reason) {
         running = false;
         session = null;
+        movePendingUntil = 0;
         mainHandler.removeCallbacks(pollRunnable);
         if (overlay != null) {
             overlay.setRunning(false);
@@ -158,6 +162,8 @@ public final class ChessAccessibilityService extends AccessibilityService {
 
     private void finishGame(String reason) {
         running = false;
+        session = null;
+        movePendingUntil = 0;
         mainHandler.removeCallbacks(pollRunnable);
         if (overlay != null) {
             overlay.setRunning(false);
@@ -190,7 +196,8 @@ public final class ChessAccessibilityService extends AccessibilityService {
     }
 
     private String processOnWorker() {
-        if (!running || session == null) {
+        AutoPlaySession activeSession = session;
+        if (!running || activeSession == null) {
             return "Stopped";
         }
         if (vision == null) {
@@ -209,23 +216,25 @@ public final class ChessAccessibilityService extends AccessibilityService {
         if (!target.equals(packageName)) {
             return "Open " + target;
         }
+        if (SystemClock.uptimeMillis() < movePendingUntil) {
+            return "Waiting for move to finish";
+        }
 
         String accessibleText = collectText(root);
-        TurnText.TurnInfo turn = TurnText.parse(accessibleText);
+        TurnText.TurnInfo accessibleTurn = TurnText.parse(accessibleText);
         Bitmap screenshot = null;
         try {
-            if (!turn.isGameOver() && turn.side == TurnText.NO_SIDE) {
-                screenshot = ScreenCapture.capture(this, 3500);
-                if (screenshot == null) {
-                    return "Screenshot unavailable";
-                }
-                String ocrText = textReader.read(screenshot);
-                TurnText.TurnInfo fromScreen = TurnText.parse(ocrText);
-                if (fromScreen.side != TurnText.NO_SIDE || fromScreen.isGameOver()) {
-                    turn = fromScreen;
-                }
+            screenshot = ScreenCapture.capture(this, 3500);
+            if (screenshot == null) {
+                return "Screenshot unavailable";
             }
+            String ocrText = textReader.read(screenshot);
+            TurnText.TurnInfo screenTurn = TurnText.parse(ocrText);
+            TurnText.TurnInfo turn = TurnText.combine(accessibleTurn, screenTurn);
 
+            if (!running || session != activeSession) {
+                return "Stopped";
+            }
             if (turn.isGameOver()) {
                 finishGame("Game over: " + turn.result);
                 return "Game over";
@@ -235,13 +244,6 @@ public final class ChessAccessibilityService extends AccessibilityService {
             }
             if (turn.side != botColor) {
                 return "Opponent's turn";
-            }
-
-            if (screenshot == null) {
-                screenshot = ScreenCapture.capture(this, 3500);
-                if (screenshot == null) {
-                    return "Screenshot unavailable";
-                }
             }
 
             Recognition recognition;
@@ -256,10 +258,14 @@ public final class ChessAccessibilityService extends AccessibilityService {
             }
 
             boolean flipped = OrientationDetector.isFlipped(recognition.position);
-            AutoPlaySession.Decision decision = session.decide(turn,
+            AutoPlaySession.Decision decision = activeSession.decide(turn,
                     recognition.position, flipped);
             switch (decision.kind) {
                 case PLAY -> {
+                    if (!running || session != activeSession) {
+                        return "Stopped";
+                    }
+                    movePendingUntil = SystemClock.uptimeMillis() + MOVE_SETTLE_MS;
                     performMove(recognition, decision.move, flipped);
                     return "Playing " + Move.toUci(decision.move)
                             + (flipped ? " (flipped board)" : "");
@@ -287,8 +293,14 @@ public final class ChessAccessibilityService extends AccessibilityService {
         int from = Move.from(move);
         int to = Move.to(move);
         mainHandler.post(() -> {
+            if (!running || session == null) {
+                return;
+            }
             tapSquare(homography, from, flipped, () -> {
                 mainHandler.postDelayed(() -> {
+                    if (!running || session == null) {
+                        return;
+                    }
                     tapSquare(homography, to, flipped, () -> {
                         if (Move.isPromotion(move)) {
                             mainHandler.postDelayed(this::choosePromotion, 650);

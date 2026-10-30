@@ -2,6 +2,7 @@ package com.chessai.android;
 
 import android.graphics.Bitmap;
 
+import com.chessai.autoplay.TurnText;
 import com.google.android.gms.tasks.Tasks;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
@@ -17,12 +18,21 @@ final class ScreenTextReader {
             TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
     String read(Bitmap screenshot) {
-        String bottomRight = readRegion(screenshot, 0.38, 0.66, 1.0, 1.0);
-        if (bottomRight != null && !bottomRight.trim().isEmpty()) {
-            return bottomRight;
+        String corner = readRegion(screenshot, 0.55, 0.82, 1.0, 1.0);
+        if (TurnText.looksLikeTurnText(corner)) {
+            return corner;
         }
-        String bottomStrip = readRegion(screenshot, 0.0, 0.75, 1.0, 1.0);
-        return bottomStrip == null ? "" : bottomStrip;
+        String bottomStrip = readRegion(screenshot, 0.0, 0.78, 1.0, 1.0);
+        if (TurnText.looksLikeTurnText(bottomStrip)) {
+            return bottomStrip;
+        }
+        if (corner == null || corner.trim().isEmpty()) {
+            return bottomStrip == null ? "" : bottomStrip;
+        }
+        if (bottomStrip == null || bottomStrip.trim().isEmpty()) {
+            return corner;
+        }
+        return corner + " " + bottomStrip;
     }
 
     private String readRegion(Bitmap source, double left, double top,
@@ -36,7 +46,7 @@ final class ScreenTextReader {
         Bitmap crop = Bitmap.createBitmap(source, x, y, w, h);
         try {
             InputImage image = InputImage.fromBitmap(crop, 0);
-            Text text = Tasks.await(recognizer.process(image), 6, TimeUnit.SECONDS);
+            Text text = Tasks.await(recognizer.process(image), 3, TimeUnit.SECONDS);
             return text.getText();
         } catch (Exception ex) {
             return "";

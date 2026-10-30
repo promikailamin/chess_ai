@@ -49,6 +49,8 @@ public final class AutoPlaySession {
         }
     }
 
+    private static final int RECENT_LIMIT = 8;
+
     private final int botColor;
     private final Search search;
     private final int maxDepth;
@@ -56,10 +58,15 @@ public final class AutoPlaySession {
     private final int minStableObservations;
     private final long retryCooldownMillis;
 
+    private final int[] recentHashes = new int[RECENT_LIMIT];
+    private int recentCount;
+    private int turnObservations;
     private int candidateHash;
     private int stableCount;
     private int lastActedHash;
     private long lastActedAt;
+    private int noMoveHash;
+    private int noMoveCount;
     private int lastMove;
     private boolean finished;
     private String finishReason;
@@ -110,11 +117,13 @@ public final class AutoPlaySession {
             actual = BoardTransforms.actualPosition(visualPosition, flipped,
                     turn.side, turn.fullmove);
         } catch (RuntimeException ex) {
+            resetObservations();
             return Decision.invalid("Could not rebuild board: " + ex.getMessage());
         }
 
         String invalid = validate(actual);
         if (invalid != null) {
+            resetObservations();
             return Decision.invalid(invalid);
         }
         if (turn.side == TurnText.NO_SIDE) {
@@ -122,19 +131,27 @@ public final class AutoPlaySession {
         }
 
         if (turn.side != botColor) {
-            candidateHash = 0;
-            stableCount = 0;
+            resetObservations();
             return Decision.wait("Opponent's turn");
         }
 
         int hash = (int) actual.getHash();
+        turnObservations++;
+        remember(hash);
         if (hash == candidateHash) {
             stableCount++;
         } else {
             candidateHash = hash;
             stableCount = 1;
         }
-        if (stableCount < minStableObservations) {
+
+        boolean stable = stableCount >= minStableObservations;
+        if (!stable
+                && turnObservations >= Math.max(3, minStableObservations + 1)
+                && occurrences(hash) >= minStableObservations) {
+            stable = true;
+        }
+        if (!stable) {
             return Decision.wait("Checking board");
         }
 
@@ -152,11 +169,22 @@ public final class AutoPlaySession {
         }
 
         if (result.move == Move.NONE) {
+            if (hash == noMoveHash) {
+                noMoveCount++;
+            } else {
+                noMoveHash = hash;
+                noMoveCount = 1;
+            }
+            if (noMoveCount < 2) {
+                return Decision.wait("No legal move - checking again");
+            }
             String reason = actual.inCheck(actual.getSide())
                     ? (actual.getSide() == botColor ? "Checkmate - bot lost" : "Checkmate - bot won")
                     : "Stalemate or draw";
             return finish(reason);
         }
+        noMoveHash = 0;
+        noMoveCount = 0;
         if (!actual.isLegal(result.move)) {
             return Decision.invalid("Engine returned an illegal move");
         }
@@ -164,9 +192,36 @@ public final class AutoPlaySession {
         lastActedHash = hash;
         lastActedAt = now;
         lastMove = result.move;
+        resetObservations();
+        return Decision.play(result.move, actual);
+    }
+
+    private void remember(int hash) {
+        if (recentCount < RECENT_LIMIT) {
+            recentHashes[recentCount++] = hash;
+            return;
+        }
+        System.arraycopy(recentHashes, 1, recentHashes, 0, RECENT_LIMIT - 1);
+        recentHashes[RECENT_LIMIT - 1] = hash;
+    }
+
+    private int occurrences(int hash) {
+        int count = 0;
+        for (int i = 0; i < recentCount; i++) {
+            if (recentHashes[i] == hash) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void resetObservations() {
         candidateHash = 0;
         stableCount = 0;
-        return Decision.play(result.move, actual);
+        recentCount = 0;
+        turnObservations = 0;
+        noMoveHash = 0;
+        noMoveCount = 0;
     }
 
     private Decision finish(String reason) {

@@ -33,6 +33,26 @@ class TurnTextTest {
         assertEquals(2, info.fullmove);
     }
 
+
+    @Test
+    void combinesAccessibilityAndScreenReadings() {
+        TurnText.TurnInfo accessible = TurnText.parse("1.Black's Move");
+        TurnText.TurnInfo screen = TurnText.parse("2.White's Move");
+        TurnText.TurnInfo combined = TurnText.combine(accessible, screen);
+        assertEquals(Piece.WHITE, combined.side);
+        assertEquals(2, combined.fullmove);
+
+        combined = TurnText.combine(accessible, TurnText.parse("no move text"));
+        assertEquals(Piece.BLACK, combined.side);
+        assertEquals(1, combined.fullmove);
+
+        combined = TurnText.combine(TurnText.parse("White wins"), screen);
+        assertTrue(combined.isGameOver());
+
+        assertTrue(TurnText.looksLikeTurnText("2.White's Move"));
+        assertFalse(TurnText.looksLikeTurnText("8 7 6 5 4 3 2 1"));
+    }
+
     @Test
     void recognisesResults() {
         assertTrue(TurnText.parse("White wins").isGameOver());

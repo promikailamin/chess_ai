@@ -49,6 +49,38 @@ public final class TurnText {
         }
     }
 
+    public static TurnInfo combine(TurnInfo accessible, TurnInfo screen) {
+        if (accessible == null) {
+            return screen;
+        }
+        if (screen == null) {
+            return accessible;
+        }
+        if (accessible.isGameOver() && !screen.isGameOver()) {
+            return accessible;
+        }
+        if (screen.isGameOver()) {
+            return screen;
+        }
+        boolean accessibleValid = accessible.side != NO_SIDE;
+        boolean screenValid = screen.side != NO_SIDE;
+        if (!accessibleValid) {
+            return screen;
+        }
+        if (!screenValid) {
+            return accessible;
+        }
+        if (screen.fullmove != accessible.fullmove) {
+            return screen.fullmove > accessible.fullmove ? screen : accessible;
+        }
+        return screen;
+    }
+
+    public static boolean looksLikeTurnText(String text) {
+        TurnInfo info = parse(text);
+        return info.side != NO_SIDE || info.isGameOver();
+    }
+
     public static TurnInfo parse(String text) {
         if (text == null) {
             text = "";
