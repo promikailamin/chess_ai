@@ -13,7 +13,7 @@ final class AndroidVision {
     private final PieceClassifier classifier;
 
     AndroidVision(AssetManager assets) {
-        classifier = new PieceClassifier(new AssetTemplateSource(assets), false);
+        classifier = new PieceClassifier(new AssetTemplateSource(assets));
     }
 
     synchronized Recognition recognize(Bitmap bitmap) {

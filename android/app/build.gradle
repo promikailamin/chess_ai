@@ -31,6 +31,8 @@ android {
                 exclude 'com/chessai/vision/ScreenshotAnalyzer.java'
                 exclude 'com/chessai/vision/ImageIoRaster.java'
                 exclude 'com/chessai/vision/AwtTemplateSource.java'
+                exclude 'com/chessai/vision/FileTemplateSource.java'
+                exclude 'com/chessai/vision/TemplateSources.java'
             }
         }
     }
