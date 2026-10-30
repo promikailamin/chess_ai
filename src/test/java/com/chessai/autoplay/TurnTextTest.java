@@ -40,4 +40,10 @@ class TurnTextTest {
         assertTrue(TurnText.parse("Stalemate").isGameOver());
         assertEquals("White wins", TurnText.parse("Black is checkmated").result);
     }
+
+    @Test
+    void menuButtonsDoNotEndTheGame() {
+        assertFalse(TurnText.parse("Draw offer  Resign  Hint  Settings").isGameOver());
+        assertFalse(TurnText.parse("Undo  Restart").isGameOver());
+    }
 }

@@ -21,11 +21,12 @@ public final class TurnText {
     private static final Pattern BLACK_RESULT = Pattern.compile(
             "(?i)\\b(?:0-1|black\\s+wins?|black\\s+won|white\\s+(?:is\\s+)?checkmated)\\b");
     private static final Pattern DRAW_RESULT = Pattern.compile(
-            "(?i)\\b(?:draw|drawn|stalemate|1/2\\s*[-\\u2013]\\s*1/2|\u00bd\\s*[-\\u2013]\\s*\u00bd"
+            "(?i)\\b(?:game\\s+drawn?|draw\\s+(?:agreed|by\\s+agreement)|stalemate"
+                    + "|1/2\\s*[-\\u2013]\\s*1/2|\u00bd\\s*[-\\u2013]\\s*\u00bd"
                     + "|insufficient\\s+material)\\b");
     private static final Pattern CHECKMATE = Pattern.compile("(?i)\\bcheck\\s*mate\\b");
     private static final Pattern GENERIC_END = Pattern.compile(
-            "(?i)\\b(?:resign(?:ed)?|time(?:d)?\\s*out|game\\s+over|abandon(?:ed)?)\\b");
+            "(?i)\\b(?:time(?:d)?\\s*out|game\\s+over|abandon(?:ed)?)\\b");
 
     private TurnText() {
     }
