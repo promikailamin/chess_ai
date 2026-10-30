@@ -39,6 +39,30 @@ public final class AwtTemplateSource implements TemplateSource {
     }
 
     @Override
+    public RgbImage rgbImage(String resourcePath) {
+        try (InputStream stream = getClass().getResourceAsStream(resourcePath)) {
+            if (stream == null) {
+                return null;
+            }
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                return null;
+            }
+            int width = image.getWidth();
+            int height = image.getHeight();
+            int[] argb = new int[width * height];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    argb[y * width + x] = image.getRGB(x, y);
+                }
+            }
+            return new RgbImage(width, height, argb);
+        } catch (IOException ignored) {
+            return null;
+        }
+    }
+
+    @Override
     public String text(String resourcePath) {
         try (InputStream stream = getClass().getResourceAsStream(resourcePath)) {
             if (stream == null) {

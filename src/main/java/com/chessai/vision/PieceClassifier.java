@@ -4,7 +4,7 @@ import com.chessai.engine.Piece;
 import com.chessai.engine.Position;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,303 +12,254 @@ import java.util.Map;
 /**
  * Reads the 64 squares of a detected board and turns them into a position.
  *
- * <p>Flat themes are matched with silhouette templates.  Rendered 3-D themes
- * are matched with gradient templates.  Both template families are shipped as
- * resources and can be extended by running {@code tools/generate_templates.py}.</p>
+ * <p>Each cell uses its own background estimate, so pieces on a crowded board
+ * do not contaminate one another.  Recognition compares both the color and the
+ * alpha shape of the bundled theme sprites, and rejects selection brackets and
+ * other overlays that do not line up with a piece silhouette.</p>
  */
 public final class PieceClassifier {
     private static final int PATCH = 96;
-    private static final int NORMALIZED = 48;
+    private static final int MATCH = 48;
+    private static final double ALPHA_CUTOFF = 0.25;
 
     private static final String[] TYPE_NAMES = {
             null, "pawn", "knight", "bishop", "rook", "queen", "king"
     };
 
-    private static final class Template {
+    private static final class ColorTemplate {
         final int type;
         final int color;
-        final boolean[] shape;
-        final boolean learned;
         final String theme;
-        final double crop;
+        final float[] rgb;
+        final float[] alpha;
+        final int bboxCenterX;
+        final int bboxCenterY;
 
-        Template(int type, boolean[] shape) {
-            this(type, -1, shape, false, null, 1.0);
-        }
-
-        Template(int type, int color, boolean[] shape, boolean learned,
-                 String theme, double crop) {
+        ColorTemplate(int type, int color, String theme, float[] rgb, float[] alpha,
+                      int bboxCenterX, int bboxCenterY) {
             this.type = type;
             this.color = color;
-            this.shape = shape;
-            this.learned = learned;
             this.theme = theme;
-            this.crop = crop;
+            this.rgb = rgb;
+            this.alpha = alpha;
+            this.bboxCenterX = bboxCenterX;
+            this.bboxCenterY = bboxCenterY;
         }
     }
 
-    private static final class Theme {
+    private static final class ColorTheme {
         final String name;
-        final double crop;
-        final List<Template> templates = new ArrayList<>();
+        final List<ColorTemplate> templates = new ArrayList<>();
+        final List<double[]> backgrounds = new ArrayList<>();
+        final List<double[]> foregrounds = new ArrayList<>();
 
-        Theme(String name, double crop) {
+        ColorTheme(String name) {
             this.name = name;
-            this.crop = crop;
         }
     }
 
-    private static final class Match {
-        int type;
-        int color = -1;
+    private static final class ColorMatch {
+        ColorTemplate template;
         double score;
-        Template template;
-        boolean flat;
+        double coverage;
+        double iou;
     }
 
     private static final class Cell {
-        int[] rgb = new int[PATCH * PATCH];
-        double[] lum = new double[PATCH * PATCH];
-        double backgroundLum;
-        final Map<Double, boolean[]> masks = new HashMap<>();
-        final Map<Double, boolean[]> shapes = new HashMap<>();
-        final Map<Double, Double> occupancies = new HashMap<>();
+        final int[] rgb = new int[PATCH * PATCH];
+        int backgroundR;
+        int backgroundG;
+        int backgroundB;
+        boolean[] mask;
+        double area;
+        double core;
+        double largestRatio;
+        boolean safe;
+        double[] downRgb;
+        boolean[] downMask;
+        int downMaskCount;
+        int minX;
+        int minY;
+        int maxX;
+        int maxY;
+        int bboxCenterX;
+        int bboxCenterY;
 
-        boolean[] mask(double crop) {
-            return masks.computeIfAbsent(crop, key -> new boolean[PATCH * PATCH]);
-        }
-
-        boolean[] shape(double crop) {
-            return shapes.get(crop);
-        }
-
-        double occupancy(double crop) {
-            Double value = occupancies.get(crop);
-            return value == null ? 0 : value;
+        boolean hasShape() {
+            return maxX >= minX && maxY >= minY;
         }
     }
 
-    private final List<Template> templates = new ArrayList<>();
-    private final Map<String, Theme> themes = new LinkedHashMap<>();
+    private final Map<String, ColorTheme> themes = new LinkedHashMap<>();
     private final TemplateSource source;
-    private final boolean useLearnedTemplates;
+    private String chosenTheme = "color";
 
     public PieceClassifier(TemplateSource source) {
-        this(source, Boolean.getBoolean("chessai.classifier.learned"));
-    }
-
-    public PieceClassifier(TemplateSource source, boolean useLearnedTemplates) {
         if (source == null) {
             throw new IllegalArgumentException("Template source is required");
         }
         this.source = source;
-        this.useLearnedTemplates = useLearnedTemplates
-                && !Boolean.getBoolean("chessai.classifier.noLearned");
         loadTemplates();
     }
 
     private void loadTemplates() {
-        boolean flatOnly = Boolean.getBoolean("chessai.classifier.flatOnly");
-        for (int type = Piece.PAWN; type <= Piece.KING; type++) {
-            loadTemplate(type, true, "/templates/2d/" + TYPE_NAMES[type] + ".png");
-            if (!flatOnly) {
-                loadTemplate(type, false, "/templates/3d/" + TYPE_NAMES[type] + ".png");
-            }
-        }
-        if (useLearnedTemplates) {
-            loadLearnedTemplates();
-        }
-    }
-
-    private void loadLearnedTemplates() {
-        String manifest = source.text("/templates/learned/manifest.csv");
+        String manifest = source.text("/templates/color/manifest.csv");
         if (manifest == null) {
             return;
         }
-        String[] lines = manifest.split("\\R");
-        for (String line : lines) {
+        for (String line : manifest.split("\\R")) {
             line = line.trim();
             if (line.isEmpty() || line.startsWith("theme,")) {
                 continue;
             }
             String[] parts = line.split(",", -1);
-            if (parts.length < 9) {
+            if (parts.length < 10) {
                 continue;
             }
             try {
                 String themeName = parts[0].trim();
                 int type = Integer.parseInt(parts[1].trim());
                 int color = Integer.parseInt(parts[2].trim());
-                double crop = Double.parseDouble(parts[4].trim());
-                String resource = "/templates/learned/" + parts[8].trim();
-                boolean[] shape = loadShape(resource);
-                if (shape == null) {
+                String resource = "/templates/color/" + parts[3].trim();
+                double[] background = {
+                        Double.parseDouble(parts[4].trim()),
+                        Double.parseDouble(parts[5].trim()),
+                        Double.parseDouble(parts[6].trim())
+                };
+                double[] foreground = {
+                        Double.parseDouble(parts[7].trim()),
+                        Double.parseDouble(parts[8].trim()),
+                        Double.parseDouble(parts[9].trim())
+                };
+                RgbImage image = source.rgbImage(resource);
+                if (image == null) {
                     continue;
                 }
-                Theme theme = themes.computeIfAbsent(themeName,
-                        key -> new Theme(key, crop));
-                theme.templates.add(new Template(type, color, shape, true,
-                        themeName, crop));
+                ColorTemplate template = makeTemplate(type, color, themeName, image);
+                if (template == null) {
+                    continue;
+                }
+                ColorTheme theme = themes.computeIfAbsent(themeName, ColorTheme::new);
+                theme.templates.add(template);
+                theme.backgrounds.add(background);
+                theme.foregrounds.add(foreground);
             } catch (NumberFormatException ignored) {
                 // Skip malformed manifest rows rather than disabling recognition.
             }
         }
     }
 
-    private boolean[] loadShape(String resource) {
-        GrayImage image = source.image(resource);
-        if (image == null) {
+    private ColorTemplate makeTemplate(int type, int color, String theme, RgbImage image) {
+        float[] rgb = new float[MATCH * MATCH * 3];
+        float[] alpha = new float[MATCH * MATCH];
+        int minX = MATCH;
+        int minY = MATCH;
+        int maxX = -1;
+        int maxY = -1;
+        for (int y = 0; y < MATCH; y++) {
+            for (int x = 0; x < MATCH; x++) {
+                int argb = sampleArgb(image, x, y);
+                int index = y * MATCH + x;
+                rgb[index * 3] = (argb >>> 16) & 0xff;
+                rgb[index * 3 + 1] = (argb >>> 8) & 0xff;
+                rgb[index * 3 + 2] = argb & 0xff;
+                float a = ((argb >>> 24) & 0xff) / 255.0f;
+                alpha[index] = a;
+                if (a > ALPHA_CUTOFF) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        if (maxX < minX || maxY < minY) {
             return null;
         }
-        boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
-        for (int y = 0; y < NORMALIZED; y++) {
-            for (int x = 0; x < NORMALIZED; x++) {
-                int sx = x * image.width / NORMALIZED;
-                int sy = y * image.height / NORMALIZED;
-                raw[y * NORMALIZED + x] = image.luminance(sx, sy) > 127;
-            }
-        }
-        return normalizeShape(raw, NORMALIZED);
+        return new ColorTemplate(type, color, theme, rgb, alpha, minX + maxX, minY + maxY);
     }
 
-    private void loadTemplate(int type, boolean flat, String resource) {
-        GrayImage image = source.image(resource);
-        if (image == null) {
-            return;
+    private int sampleArgb(RgbImage image, int x, int y) {
+        if (image.width == MATCH && image.height == MATCH) {
+            return image.argbAt(x, y);
         }
-        boolean[] raw = new boolean[NORMALIZED * NORMALIZED];
-        for (int y = 0; y < NORMALIZED; y++) {
-            for (int x = 0; x < NORMALIZED; x++) {
-                int sx = x * image.width / NORMALIZED;
-                int sy = y * image.height / NORMALIZED;
-                raw[y * NORMALIZED + x] = image.luminance(sx, sy) / 255.0 > 0.45;
-            }
+        double sourceX = (x + 0.5) * image.width / MATCH - 0.5;
+        double sourceY = (y + 0.5) * image.height / MATCH - 0.5;
+        int x0 = (int) Math.floor(sourceX);
+        int y0 = (int) Math.floor(sourceY);
+        int x1 = x0 + 1;
+        int y1 = y0 + 1;
+        double fx = sourceX - x0;
+        double fy = sourceY - y0;
+        int p00 = image.argbAt(x0, y0);
+        int p10 = image.argbAt(x1, y0);
+        int p01 = image.argbAt(x0, y1);
+        int p11 = image.argbAt(x1, y1);
+        int out = 0;
+        for (int shift = 24; shift >= 0; shift -= 8) {
+            double c00 = (p00 >>> shift) & 0xff;
+            double c10 = (p10 >>> shift) & 0xff;
+            double c01 = (p01 >>> shift) & 0xff;
+            double c11 = (p11 >>> shift) & 0xff;
+            double top = c00 * (1 - fx) + c10 * fx;
+            double bottom = c01 * (1 - fx) + c11 * fx;
+            int value = (int) Math.round(top * (1 - fy) + bottom * fy);
+            out |= (value & 0xff) << shift;
         }
-        templates.add(new Template(type, normalizeShape(raw, NORMALIZED)));
+        return out;
     }
 
     public Recognition recognize(RasterImage image, BoardDetector.Detection detection) {
         Cell[] cells = new Cell[64];
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                cells[row * 8 + col] = extractRaw(image, detection.unitToImage, row, col);
-            }
-        }
-        int[][] backgrounds = estimateBackgrounds(cells);
-        List<Double> crops = new ArrayList<>();
-        for (Theme theme : themes.values()) {
-            if (!crops.contains(theme.crop)) {
-                crops.add(theme.crop);
-            }
-        }
-        if (crops.isEmpty()) {
-            crops.add(1.0);
-        }
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                Cell cell = cells[row * 8 + col];
-                int parity = (row + col) & 1;
-                for (double crop : crops) {
-                    prepareCell(cell, backgrounds, parity, crop);
-                }
+                cells[row * 8 + col] = extractCell(image, detection.unitToImage, row, col);
             }
         }
 
+        ColorTheme theme = chooseTheme(cells);
         int[] board = new int[64];
         char[][] chars = new char[8][8];
         double confidenceSum = 0;
         int occupied = 0;
-        String chosenTheme = "built-in";
 
-        if (!themes.isEmpty()) {
-            Theme bestTheme = null;
-            double bestScore = -1;
-            Match[] bestMatches = null;
-            for (Theme theme : themes.values()) {
-                Match[] matches = new Match[64];
-                double total = 0;
-                int count = 0;
-                for (int index = 0; index < 64; index++) {
-                    Cell cell = cells[index];
-                    if (cell.occupancy(theme.crop) < 0.014) {
-                        continue;
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                int index = row * 8 + col;
+                int rank = 7 - row;
+                int square = rank * 8 + col;
+                Cell cell = cells[index];
+                ColorMatch match = null;
+                boolean occupiedCell = false;
+                if (theme != null && cell.area >= 0.015) {
+                    match = match(cell, theme);
+                    if (match != null) {
+                        boolean safeShape = cell.core >= 0.02 && cell.largestRatio >= 0.3;
+                        boolean alignedShape = match.iou >= 0.08 && match.score >= 0.86;
+                        occupiedCell = cell.area >= 0.02 && (safeShape || alignedShape);
                     }
-                    Match match = classifyType(cell, theme.crop, theme.templates);
-                    if (match == null) {
-                        continue;
-                    }
-                    matches[index] = match;
-                    total += match.score;
-                    count++;
                 }
-                double score = count == 0 ? 0 : total / count;
                 if (Boolean.getBoolean("chessai.debug")) {
-                    System.out.printf("theme-score %s=%.3f (%d cells)%n", theme.name, score, count);
+                    System.out.printf("cell r%d c%d area=%.3f core=%.3f lr=%.3f theme=%s "
+                                    + "match=%s score=%.3f iou=%.3f occ=%s%n",
+                            row, col, cell.area, cell.core, cell.largestRatio,
+                            theme == null ? "-" : theme.name,
+                            match == null ? "-" : TYPE_NAMES[match.template.type],
+                            match == null ? 0 : match.score,
+                            match == null ? 0 : match.iou,
+                            occupiedCell);
                 }
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestTheme = theme;
-                    bestMatches = matches;
+                if (!occupiedCell || match == null || match.score < 0.33) {
+                    board[square] = Piece.EMPTY;
+                    chars[row][col] = '.';
+                    continue;
                 }
-            }
-            if (bestTheme != null && bestMatches != null) {
-                chosenTheme = bestTheme.name;
-                for (int index = 0; index < 64; index++) {
-                    int row = index / 8;
-                    int col = index % 8;
-                    int rank = 7 - row;
-                    int square = rank * 8 + col;
-                    Cell cell = cells[index];
-                    Match match = bestMatches[index];
-                    if (Boolean.getBoolean("chessai.debug")) {
-                        System.out.printf("cell r%d c%d occ=%.3f match=%s score=%.3f%n",
-                                row, col, cell.occupancy(bestTheme.crop),
-                                match == null ? "-" : TYPE_NAMES[match.type],
-                                match == null ? 0 : match.score);
-                    }
-                    if (cell.occupancy(bestTheme.crop) < 0.014
-                            || match == null || match.score < 0.33) {
-                        board[square] = Piece.EMPTY;
-                        chars[row][col] = '.';
-                        continue;
-                    }
-                    boolean white = match.color >= 0
-                            ? match.color == 0
-                            : isWhite(cell, bestTheme.crop);
-                    int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.type);
-                    board[square] = piece;
-                    chars[row][col] = Piece.toChar(piece);
-                    confidenceSum += match.score;
-                    occupied++;
-                }
-            }
-        } else {
-            for (int row = 0; row < 8; row++) {
-                for (int col = 0; col < 8; col++) {
-                    int index = row * 8 + col;
-                    Cell cell = cells[index];
-                    int rank = 7 - row;
-                    int square = rank * 8 + col;
-                    if (cell.occupancy(1.0) < 0.014) {
-                        board[square] = Piece.EMPTY;
-                        chars[row][col] = '.';
-                        continue;
-                    }
-                    Match match = classifyType(cell, 1.0, templates);
-                    if (match == null || match.score < 0.33) {
-                        board[square] = Piece.EMPTY;
-                        chars[row][col] = '.';
-                        continue;
-                    }
-                    boolean white = match.color >= 0
-                            ? match.color == 0
-                            : isWhite(cell, 1.0);
-                    int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.type);
-                    board[square] = piece;
-                    chars[row][col] = Piece.toChar(piece);
-                    confidenceSum += match.score;
-                    occupied++;
-                }
+                boolean white = match.template.color == 0;
+                int piece = Piece.make(white ? Piece.WHITE : Piece.BLACK, match.template.type);
+                board[square] = piece;
+                chars[row][col] = Piece.toChar(piece);
+                confidenceSum += match.score;
+                occupied++;
             }
         }
 
@@ -327,8 +278,6 @@ public final class PieceClassifier {
         int whiteKings = countKing(board, Piece.WHITE);
         int blackKings = countKing(board, Piece.BLACK);
         if (whiteKings == 0 || blackKings == 0) {
-            // Keep the position playable in the GUI; the confidence tells the
-            // caller that recognition was incomplete.
             if (whiteKings == 0) {
                 placeMissingKing(position, Piece.WHITE);
             }
@@ -340,6 +289,485 @@ public final class PieceClassifier {
         double confidence = occupied == 0 ? 0 : confidenceSum / occupied;
         return new Recognition(position, confidence, detection.score, detection.method,
                 detection.quad, chars);
+    }
+
+    private ColorTheme chooseTheme(Cell[] cells) {
+        if (themes.isEmpty()) {
+            chosenTheme = "none";
+            return null;
+        }
+        List<ColorTheme> candidates = rankThemes(cells);
+        ColorTheme best = null;
+        double bestScore = -1;
+        for (ColorTheme theme : candidates) {
+            double total = 0;
+            int count = 0;
+            for (Cell cell : cells) {
+                if (!cell.safe) {
+                    continue;
+                }
+                ColorMatch match = match(cell, theme);
+                if (match != null) {
+                    total += match.score;
+                    count++;
+                }
+            }
+            double score = count == 0 ? 0 : total / count;
+            if (Boolean.getBoolean("chessai.debug")) {
+                System.out.printf("theme-score %s=%.3f (%d cells)%n", theme.name, score, count);
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                best = theme;
+            }
+        }
+        if (best == null) {
+            best = candidates.get(0);
+        }
+        chosenTheme = best.name;
+        return best;
+    }
+
+    private List<ColorTheme> rankThemes(Cell[] cells) {
+        double[][] backgrounds = new double[64][3];
+        List<double[]> foregroundList = new ArrayList<>();
+        for (int i = 0; i < cells.length; i++) {
+            Cell cell = cells[i];
+            backgrounds[i][0] = cell.backgroundR;
+            backgrounds[i][1] = cell.backgroundG;
+            backgrounds[i][2] = cell.backgroundB;
+            if (cell.area >= 0.02 && cell.core >= 0.02) {
+                foregroundList.add(meanMaskedColor(cell));
+            }
+        }
+        java.util.Arrays.sort(backgrounds, Comparator.comparingDouble(PieceClassifier::luminance));
+        double[] darkBackground = mean(backgrounds, 0, 32);
+        double[] lightBackground = mean(backgrounds, 32, 64);
+
+        double[] darkForeground = {128, 128, 128};
+        double[] lightForeground = {128, 128, 128};
+        if (!foregroundList.isEmpty()) {
+            foregroundList.sort(Comparator.comparingDouble(PieceClassifier::luminance));
+            int quarter = Math.max(1, foregroundList.size() / 4);
+            darkForeground = mean(foregroundList, 0, quarter);
+            lightForeground = mean(foregroundList,
+                    foregroundList.size() - quarter, foregroundList.size());
+        }
+
+        List<ThemeScore> scores = new ArrayList<>();
+        for (ColorTheme theme : themes.values()) {
+            double backgroundScore = (nearest(darkBackground, theme.backgrounds)
+                    + nearest(lightBackground, theme.backgrounds)) / 2.0;
+            double foregroundScore = (nearest(lightForeground, theme.foregrounds)
+                    + nearest(darkForeground, theme.foregrounds)) / 2.0;
+            scores.add(new ThemeScore(theme, backgroundScore * 0.45 + foregroundScore * 0.55));
+        }
+        scores.sort(Comparator.comparingDouble(score -> score.score));
+        List<ColorTheme> result = new ArrayList<>();
+        int limit = Math.min(5, scores.size());
+        for (int i = 0; i < limit; i++) {
+            result.add(scores.get(i).theme);
+        }
+        return result;
+    }
+
+    private static final class ThemeScore {
+        final ColorTheme theme;
+        final double score;
+
+        ThemeScore(ColorTheme theme, double score) {
+            this.theme = theme;
+            this.score = score;
+        }
+    }
+
+    private double[] meanMaskedColor(Cell cell) {
+        double red = 0;
+        double green = 0;
+        double blue = 0;
+        int count = 0;
+        for (int i = 0; i < cell.mask.length; i++) {
+            if (!cell.mask[i]) {
+                continue;
+            }
+            int rgb = cell.rgb[i];
+            red += (rgb >>> 16) & 0xff;
+            green += (rgb >>> 8) & 0xff;
+            blue += rgb & 0xff;
+            count++;
+        }
+        if (count == 0) {
+            return new double[]{cell.backgroundR, cell.backgroundG, cell.backgroundB};
+        }
+        return new double[]{red / count, green / count, blue / count};
+    }
+
+    private static double nearest(double[] color, List<double[]> palette) {
+        double best = Double.MAX_VALUE;
+        for (double[] candidate : palette) {
+            double dr = color[0] - candidate[0];
+            double dg = color[1] - candidate[1];
+            double db = color[2] - candidate[2];
+            best = Math.min(best, Math.sqrt(dr * dr + dg * dg + db * db));
+        }
+        return best == Double.MAX_VALUE ? 255 : best;
+    }
+
+    private static double luminance(double[] color) {
+        return 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2];
+    }
+
+    private static double[] mean(double[][] colors, int from, int to) {
+        double[] out = new double[3];
+        if (to <= from) {
+            return out;
+        }
+        for (int i = from; i < to; i++) {
+            out[0] += colors[i][0];
+            out[1] += colors[i][1];
+            out[2] += colors[i][2];
+        }
+        out[0] /= to - from;
+        out[1] /= to - from;
+        out[2] /= to - from;
+        return out;
+    }
+
+    private static double[] mean(List<double[]> colors, int from, int to) {
+        double[] out = new double[3];
+        if (to <= from) {
+            return out;
+        }
+        for (int i = from; i < to; i++) {
+            double[] color = colors.get(i);
+            out[0] += color[0];
+            out[1] += color[1];
+            out[2] += color[2];
+        }
+        out[0] /= to - from;
+        out[1] /= to - from;
+        out[2] /= to - from;
+        return out;
+    }
+
+    private Cell extractCell(RasterImage image, Homography homography, int row, int col) {
+        Cell cell = new Cell();
+        double[] luminance = new double[PATCH * PATCH];
+        for (int y = 0; y < PATCH; y++) {
+            for (int x = 0; x < PATCH; x++) {
+                double u = (col + (x + 0.5) / PATCH) / 8.0;
+                double v = (row + (y + 0.5) / PATCH) / 8.0;
+                double[] point = homography.map(u, v);
+                int[] rgb = image.rgbAt(point[0], point[1]);
+                int index = y * PATCH + x;
+                cell.rgb[index] = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+                luminance[index] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+            }
+        }
+        estimateBackground(cell);
+        boolean[] mask = buildMask(cell, luminance);
+        cell.mask = mask;
+        int area = 0;
+        int core = 0;
+        for (int y = 0; y < PATCH; y++) {
+            for (int x = 0; x < PATCH; x++) {
+                if (mask[y * PATCH + x]) {
+                    area++;
+                    if (x >= 34 && x < 62 && y >= 34 && y < 62) {
+                        core++;
+                    }
+                }
+            }
+        }
+        cell.area = area / (double) (PATCH * PATCH);
+        cell.core = core / (28.0 * 28.0);
+        int largest = largestComponentArea(mask);
+        cell.largestRatio = area == 0 ? 0 : largest / (double) area;
+        cell.safe = cell.area >= 0.02 && cell.core >= 0.02 && cell.largestRatio >= 0.3;
+        prepareMatchImage(cell);
+        return cell;
+    }
+
+    private void estimateBackground(Cell cell) {
+        int[] red = new int[256];
+        int[] green = new int[256];
+        int[] blue = new int[256];
+        int count = 0;
+        for (int y = 0; y < PATCH; y++) {
+            for (int x = 0; x < PATCH; x++) {
+                if (x < 3 || y < 3 || x >= PATCH - 3 || y >= PATCH - 3) {
+                    continue;
+                }
+                if (x >= 8 && x < PATCH - 8 && y >= 8 && y < PATCH - 8) {
+                    continue;
+                }
+                int rgb = cell.rgb[y * PATCH + x];
+                red[(rgb >>> 16) & 0xff]++;
+                green[(rgb >>> 8) & 0xff]++;
+                blue[rgb & 0xff]++;
+                count++;
+            }
+        }
+        cell.backgroundR = histogramMedian(red, count);
+        cell.backgroundG = histogramMedian(green, count);
+        cell.backgroundB = histogramMedian(blue, count);
+    }
+
+    private int histogramMedian(int[] histogram, int count) {
+        if (count == 0) {
+            return 128;
+        }
+        int left = (count - 1) / 2;
+        int right = count / 2;
+        int seen = 0;
+        int leftValue = 0;
+        int rightValue = 0;
+        for (int i = 0; i < histogram.length; i++) {
+            seen += histogram[i];
+            if (seen > left && leftValue == 0) {
+                leftValue = i;
+            }
+            if (seen > right) {
+                rightValue = i;
+                break;
+            }
+        }
+        return (leftValue + rightValue) / 2;
+    }
+
+    private boolean[] buildMask(Cell cell, double[] luminance) {
+        boolean[] raw = new boolean[PATCH * PATCH];
+        double backgroundLuminance = 0.299 * cell.backgroundR
+                + 0.587 * cell.backgroundG + 0.114 * cell.backgroundB;
+        for (int y = 4; y < PATCH - 4; y++) {
+            for (int x = 4; x < PATCH - 4; x++) {
+                int index = y * PATCH + x;
+                int rgb = cell.rgb[index];
+                int r = (rgb >>> 16) & 0xff;
+                int g = (rgb >>> 8) & 0xff;
+                int b = rgb & 0xff;
+                int distance = Math.max(Math.abs(r - cell.backgroundR),
+                        Math.max(Math.abs(g - cell.backgroundG),
+                                Math.abs(b - cell.backgroundB)));
+                double lumShift = Math.abs(luminance[index] - backgroundLuminance);
+                raw[index] = distance > 30 || lumShift > 34;
+            }
+        }
+        boolean[] opened = dilate(erode(raw, 1), 1);
+        return erode(dilate(opened, 2), 2);
+    }
+
+    private static boolean[] erode(boolean[] input, int radius) {
+        boolean[] out = new boolean[input.length];
+        for (int y = 0; y < PATCH; y++) {
+            for (int x = 0; x < PATCH; x++) {
+                boolean keep = true;
+                for (int dy = -radius; dy <= radius && keep; dy++) {
+                    for (int dx = -radius; dx <= radius; dx++) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx < 0 || ny < 0 || nx >= PATCH || ny >= PATCH
+                                || !input[ny * PATCH + nx]) {
+                            keep = false;
+                            break;
+                        }
+                    }
+                }
+                out[y * PATCH + x] = keep;
+            }
+        }
+        return out;
+    }
+
+    private static boolean[] dilate(boolean[] input, int radius) {
+        boolean[] out = new boolean[input.length];
+        for (int y = 0; y < PATCH; y++) {
+            for (int x = 0; x < PATCH; x++) {
+                boolean set = false;
+                for (int dy = -radius; dy <= radius && !set; dy++) {
+                    for (int dx = -radius; dx <= radius; dx++) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx >= 0 && ny >= 0 && nx < PATCH && ny < PATCH
+                                && input[ny * PATCH + nx]) {
+                            set = true;
+                            break;
+                        }
+                    }
+                }
+                out[y * PATCH + x] = set;
+            }
+        }
+        return out;
+    }
+
+    private int largestComponentArea(boolean[] mask) {
+        int[] labels = new int[mask.length];
+        java.util.Arrays.fill(labels, -1);
+        int[] queue = new int[mask.length];
+        int best = 0;
+        int label = 0;
+        for (int start = 0; start < mask.length; start++) {
+            if (!mask[start] || labels[start] >= 0) {
+                continue;
+            }
+            int head = 0;
+            int tail = 0;
+            queue[tail++] = start;
+            labels[start] = label;
+            int area = 0;
+            while (head < tail) {
+                int current = queue[head++];
+                int x = current % PATCH;
+                int y = current / PATCH;
+                area++;
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        if (dx == 0 && dy == 0) {
+                            continue;
+                        }
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx < 0 || ny < 0 || nx >= PATCH || ny >= PATCH) {
+                            continue;
+                        }
+                        int next = ny * PATCH + nx;
+                        if (mask[next] && labels[next] < 0) {
+                            labels[next] = label;
+                            queue[tail++] = next;
+                        }
+                    }
+                }
+            }
+            best = Math.max(best, area);
+            label++;
+        }
+        return best;
+    }
+
+    private void prepareMatchImage(Cell cell) {
+        cell.downRgb = new double[MATCH * MATCH * 3];
+        for (int y = 0; y < MATCH; y++) {
+            double sourceY = (y + 0.5) * PATCH / MATCH - 0.5;
+            int y0 = (int) Math.floor(sourceY);
+            int y1 = y0 + 1;
+            double fy = sourceY - y0;
+            for (int x = 0; x < MATCH; x++) {
+                double sourceX = (x + 0.5) * PATCH / MATCH - 0.5;
+                int x0 = (int) Math.floor(sourceX);
+                int x1 = x0 + 1;
+                double fx = sourceX - x0;
+                int index = y * MATCH + x;
+                for (int channel = 0; channel < 3; channel++) {
+                    int shift = 16 - channel * 8;
+                    double c00 = (cell.rgb[clampedIndex(x0, y0)] >>> shift) & 0xff;
+                    double c10 = (cell.rgb[clampedIndex(x1, y0)] >>> shift) & 0xff;
+                    double c01 = (cell.rgb[clampedIndex(x0, y1)] >>> shift) & 0xff;
+                    double c11 = (cell.rgb[clampedIndex(x1, y1)] >>> shift) & 0xff;
+                    double top = c00 * (1 - fx) + c10 * fx;
+                    double bottom = c01 * (1 - fx) + c11 * fx;
+                    cell.downRgb[index * 3 + channel] = top * (1 - fy) + bottom * fy;
+                }
+            }
+        }
+
+        cell.downMask = new boolean[MATCH * MATCH];
+        cell.minX = MATCH;
+        cell.minY = MATCH;
+        cell.maxX = -1;
+        cell.maxY = -1;
+        cell.downMaskCount = 0;
+        for (int y = 0; y < MATCH; y++) {
+            int sourceY = (int) Math.floor((y + 0.5) * PATCH / MATCH);
+            for (int x = 0; x < MATCH; x++) {
+                int sourceX = (int) Math.floor((x + 0.5) * PATCH / MATCH);
+                if (cell.mask[clampedIndex(sourceX, sourceY)]) {
+                    cell.downMask[y * MATCH + x] = true;
+                    cell.downMaskCount++;
+                    if (x < cell.minX) cell.minX = x;
+                    if (x > cell.maxX) cell.maxX = x;
+                    if (y < cell.minY) cell.minY = y;
+                    if (y > cell.maxY) cell.maxY = y;
+                }
+            }
+        }
+        cell.bboxCenterX = cell.minX + cell.maxX;
+        cell.bboxCenterY = cell.minY + cell.maxY;
+    }
+
+    private static int clampedIndex(int x, int y) {
+        int cx = Math.max(0, Math.min(PATCH - 1, x));
+        int cy = Math.max(0, Math.min(PATCH - 1, y));
+        return cy * PATCH + cx;
+    }
+
+    private ColorMatch match(Cell cell, ColorTheme theme) {
+        if (!cell.hasShape() || cell.downMaskCount == 0) {
+            return null;
+        }
+        ColorMatch best = null;
+        for (ColorTemplate template : theme.templates) {
+            int dx = (int) Math.round((cell.bboxCenterX - template.bboxCenterX) / 2.0);
+            int dy = (int) Math.round((cell.bboxCenterY - template.bboxCenterY) / 2.0);
+            dx = Math.max(-4, Math.min(4, dx));
+            dy = Math.max(-4, Math.min(4, dy));
+            for (int pass = 0; pass < 2; pass++) {
+                int shiftX = pass == 0 ? 0 : dx;
+                int shiftY = pass == 0 ? 0 : dy;
+                if (pass == 1 && shiftX == 0 && shiftY == 0) {
+                    continue;
+                }
+                ColorMatch current = score(cell, template, shiftX, shiftY);
+                if (current != null && (best == null || current.score > best.score)) {
+                    best = current;
+                }
+            }
+        }
+        return best;
+    }
+
+    private ColorMatch score(Cell cell, ColorTemplate template, int shiftX, int shiftY) {
+        double difference = 0;
+        int count = 0;
+        int intersection = 0;
+        int templateArea = 0;
+        for (int y = 0; y < MATCH; y++) {
+            int sy = Math.floorMod(y - shiftY, MATCH);
+            for (int x = 0; x < MATCH; x++) {
+                int sx = Math.floorMod(x - shiftX, MATCH);
+                int templateIndex = sy * MATCH + sx;
+                float alpha = template.alpha[templateIndex];
+                if (alpha <= ALPHA_CUTOFF) {
+                    continue;
+                }
+                templateArea++;
+                int index = y * MATCH + x;
+                if (cell.downMask[index]) {
+                    intersection++;
+                }
+                double a = alpha;
+                double red = template.rgb[templateIndex * 3] * a
+                        + cell.backgroundR * (1 - a);
+                double green = template.rgb[templateIndex * 3 + 1] * a
+                        + cell.backgroundG * (1 - a);
+                double blue = template.rgb[templateIndex * 3 + 2] * a
+                        + cell.backgroundB * (1 - a);
+                difference += Math.abs(cell.downRgb[index * 3] - red);
+                difference += Math.abs(cell.downRgb[index * 3 + 1] - green);
+                difference += Math.abs(cell.downRgb[index * 3 + 2] - blue);
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        ColorMatch match = new ColorMatch();
+        match.template = template;
+        match.score = 1 - difference / (count * 3.0 * 255.0);
+        match.coverage = intersection / (double) cell.downMaskCount;
+        int union = cell.downMaskCount + templateArea - intersection;
+        match.iou = union == 0 ? 0 : intersection / (double) union;
+        return match;
     }
 
     private int inferCastling(int[] board) {
@@ -386,474 +814,5 @@ public final class PieceClassifier {
                 return;
             }
         }
-    }
-
-    private Cell extractRaw(RasterImage image, Homography homography, int row, int col) {
-        Cell cell = new Cell();
-        for (int y = 0; y < PATCH; y++) {
-            for (int x = 0; x < PATCH; x++) {
-                double u = (col + (x + 0.5) / PATCH) / 8.0;
-                double v = (row + (y + 0.5) / PATCH) / 8.0;
-                double[] point = homography.map(u, v);
-                int[] rgb = image.rgbAt(point[0], point[1]);
-                int index = y * PATCH + x;
-                cell.rgb[index] = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
-                cell.lum[index] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-            }
-        }
-        return cell;
-    }
-
-    private int[][] estimateBackgrounds(Cell[] cells) {
-        int[][][] r = new int[2][PATCH * PATCH][32];
-        int[][][] g = new int[2][PATCH * PATCH][32];
-        int[][][] b = new int[2][PATCH * PATCH][32];
-        int[] counts = new int[2];
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                int parity = (row + col) & 1;
-                int slot = counts[parity]++;
-                Cell cell = cells[row * 8 + col];
-                for (int i = 0; i < PATCH * PATCH; i++) {
-                    int rgb = cell.rgb[i];
-                    r[parity][i][slot] = (rgb >>> 16) & 0xff;
-                    g[parity][i][slot] = (rgb >>> 8) & 0xff;
-                    b[parity][i][slot] = rgb & 0xff;
-                }
-            }
-        }
-        int[][] backgrounds = new int[2][PATCH * PATCH];
-        for (int parity = 0; parity < 2; parity++) {
-            int count = Math.max(1, counts[parity]);
-            for (int i = 0; i < PATCH * PATCH; i++) {
-                int rr = median(r[parity][i], count);
-                int gg = median(g[parity][i], count);
-                int bb = median(b[parity][i], count);
-                backgrounds[parity][i] = (rr << 16) | (gg << 8) | bb;
-            }
-        }
-        return backgrounds;
-    }
-
-    private int median(int[] values, int count) {
-        int[] copy = java.util.Arrays.copyOf(values, count);
-        java.util.Arrays.sort(copy);
-        return copy[count / 2];
-    }
-
-    private void prepareCell(Cell cell, int[][] backgrounds, int parity, double crop) {
-        int cutoff = Math.max(1, Math.min(PATCH, (int) Math.round(crop * PATCH)));
-        boolean[] mask = new boolean[PATCH * PATCH];
-        for (int y = 4; y < cutoff - 4; y++) {
-            for (int x = 4; x < PATCH - 4; x++) {
-                int index = y * PATCH + x;
-                int rgb = cell.rgb[index];
-                int r = (rgb >>> 16) & 0xff;
-                int g = (rgb >>> 8) & 0xff;
-                int b = rgb & 0xff;
-                int bg = backgrounds[parity][index];
-                int bgR = (bg >>> 16) & 0xff;
-                int bgG = (bg >>> 8) & 0xff;
-                int bgB = bg & 0xff;
-                int distance = Math.max(Math.abs(r - bgR),
-                        Math.max(Math.abs(g - bgG), Math.abs(b - bgB)));
-                double bgLum = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
-                int lumShift = (int) Math.round(Math.abs(cell.lum[index] - bgLum));
-                mask[index] = distance > 26 || lumShift > 30;
-            }
-        }
-        mask = openClose(mask);
-        mask = largestComponent(mask, cutoff);
-        cell.masks.put(crop, mask);
-        int area = 0;
-        for (boolean value : mask) {
-            if (value) {
-                area++;
-            }
-        }
-        cell.occupancies.put(crop, area / (double) (PATCH * PATCH));
-
-        boolean[] flatMask = new boolean[NORMALIZED * NORMALIZED];
-        for (int y = 0; y < NORMALIZED; y++) {
-            for (int x = 0; x < NORMALIZED; x++) {
-                int count = 0;
-                for (int dy = 0; dy < 2; dy++) {
-                    for (int dx = 0; dx < 2; dx++) {
-                        if (mask[(y * 2 + dy) * PATCH + (x * 2 + dx)]) {
-                            count++;
-                        }
-                    }
-                }
-                flatMask[y * NORMALIZED + x] = count >= 2;
-            }
-        }
-        cell.shapes.put(crop, normalizeShape(flatMask, NORMALIZED));
-    }
-
-    private Match classifyType(Cell cell, double crop, List<Template> candidates) {
-        Match best = null;
-        boolean[] shape = cell.shape(crop);
-        if (shape == null) {
-            return null;
-        }
-        for (Template template : candidates) {
-            double score = dice(shape, template.shape);
-            if (template.type == Piece.KNIGHT) {
-                score = Math.max(score, dice(mirror(shape), template.shape));
-            }
-            if (best == null || score > best.score) {
-                best = new Match();
-                best.type = template.type;
-                best.score = score;
-                best.template = template;
-                best.flat = template.learned;
-                best.color = template.color;
-            }
-        }
-        return best;
-    }
-
-    private boolean isWhite(Cell cell, double crop) {
-        boolean[] mask = cell.mask(crop);
-        double bright = 0;
-        double dark = 0;
-        double sum = 0;
-        int count = 0;
-        for (int i = 0; i < mask.length; i++) {
-            if (!mask[i]) {
-                continue;
-            }
-            double value = cell.lum[i];
-            sum += value;
-            count++;
-            if (value > 170) {
-                bright++;
-            } else if (value < 90) {
-                dark++;
-            }
-        }
-        if (count == 0) {
-            return true;
-        }
-        double mean = sum / count;
-        if (bright > dark * 1.1) {
-            return true;
-        }
-        if (dark > bright * 1.1) {
-            return false;
-        }
-        return mean > 125;
-    }
-
-    private static double dice(boolean[] mask, boolean[] template) {
-        int intersection = 0;
-        int maskArea = 0;
-        int templateArea = 0;
-        for (int i = 0; i < mask.length; i++) {
-            if (mask[i]) {
-                maskArea++;
-                if (template[i]) {
-                    intersection++;
-                }
-            }
-            if (template[i]) {
-                templateArea++;
-            }
-        }
-        if (maskArea == 0 || templateArea == 0) {
-            return 0;
-        }
-        return 2.0 * intersection / (maskArea + templateArea);
-    }
-
-    private static boolean[] mirror(boolean[] mask) {
-        int size = (int) Math.round(Math.sqrt(mask.length));
-        boolean[] out = new boolean[mask.length];
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                out[y * size + x] = mask[y * size + (size - 1 - x)];
-            }
-        }
-        return out;
-    }
-
-    private static boolean[] normalizeShape(boolean[] mask, int size) {
-        int minX = size;
-        int minY = size;
-        int maxX = -1;
-        int maxY = -1;
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                if (mask[y * size + x]) {
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                }
-            }
-        }
-        boolean[] out = new boolean[size * size];
-        if (maxX < minX || maxY < minY) {
-            return out;
-        }
-        int width = maxX - minX + 1;
-        int height = maxY - minY + 1;
-        double scale = (size - 1.0) / Math.max(width, height);
-        double offsetX = (size - width * scale) / 2.0;
-        double offsetY = (size - height * scale) / 2.0;
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                int sx = minX + (int) Math.round((x - offsetX) / scale);
-                int sy = minY + (int) Math.round((y - offsetY) / scale);
-                if (sx >= minX && sx <= maxX && sy >= minY && sy <= maxY) {
-                    out[y * size + x] = mask[sy * size + sx];
-                }
-            }
-        }
-        return out;
-    }
-
-    private double correlation(double[] a, double[] b) {
-        double meanA = 0;
-        double meanB = 0;
-        for (int i = 0; i < a.length; i++) {
-            meanA += a[i];
-            meanB += b[i];
-        }
-        meanA /= a.length;
-        meanB /= b.length;
-        double numerator = 0;
-        double varianceA = 0;
-        double varianceB = 0;
-        for (int i = 0; i < a.length; i++) {
-            double da = a[i] - meanA;
-            double db = b[i] - meanB;
-            numerator += da * db;
-            varianceA += da * da;
-            varianceB += db * db;
-        }
-        if (varianceA < 1e-9 || varianceB < 1e-9) {
-            return 0;
-        }
-        return Math.max(0, numerator / Math.sqrt(varianceA * varianceB));
-    }
-
-    private boolean[] openClose(boolean[] input) {
-        boolean[] eroded = erode(input);
-        boolean[] opened = dilate(eroded);
-        boolean[] dilated = dilate(opened);
-        return erode(dilated);
-    }
-
-    private boolean[] erode(boolean[] input) {
-        boolean[] out = new boolean[input.length];
-        for (int y = 1; y < PATCH - 1; y++) {
-            for (int x = 1; x < PATCH - 1; x++) {
-                boolean keep = true;
-                for (int dy = -1; dy <= 1 && keep; dy++) {
-                    for (int dx = -1; dx <= 1; dx++) {
-                        if (!input[(y + dy) * PATCH + (x + dx)]) {
-                            keep = false;
-                            break;
-                        }
-                    }
-                }
-                out[y * PATCH + x] = keep;
-            }
-        }
-        return out;
-    }
-
-    private boolean[] dilate(boolean[] input) {
-        boolean[] out = new boolean[input.length];
-        for (int y = 1; y < PATCH - 1; y++) {
-            for (int x = 1; x < PATCH - 1; x++) {
-                boolean set = false;
-                for (int dy = -1; dy <= 1 && !set; dy++) {
-                    for (int dx = -1; dx <= 1; dx++) {
-                        if (input[(y + dy) * PATCH + (x + dx)]) {
-                            set = true;
-                            break;
-                        }
-                    }
-                }
-                out[y * PATCH + x] = set;
-            }
-        }
-        return out;
-    }
-
-    private boolean[] largestComponent(boolean[] mask, int cutoff) {
-        int[] labels = new int[mask.length];
-        java.util.Arrays.fill(labels, -1);
-        int[] queue = new int[mask.length];
-        int bestLabel = -1;
-        double bestScore = -1;
-        int edgeLabel = -1;
-        double edgeScore = -1;
-        int label = 0;
-        double center = PATCH / 2.0;
-        for (int start = 0; start < mask.length; start++) {
-            if (!mask[start] || labels[start] >= 0) {
-                continue;
-            }
-            int head = 0;
-            int tail = 0;
-            queue[tail++] = start;
-            labels[start] = label;
-            int area = 0;
-            double sumX = 0;
-            double sumY = 0;
-            int minX = PATCH;
-            int maxX = -1;
-            int minY = PATCH;
-            int maxY = -1;
-            while (head < tail) {
-                int current = queue[head++];
-                int x = current % PATCH;
-                int y = current / PATCH;
-                area++;
-                sumX += x;
-                sumY += y;
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
-                for (int dy = -1; dy <= 1; dy++) {
-                    for (int dx = -1; dx <= 1; dx++) {
-                        if (dx == 0 && dy == 0) {
-                            continue;
-                        }
-                        int nx = x + dx;
-                        int ny = y + dy;
-                        if (nx < 0 || ny < 0 || nx >= PATCH || ny >= PATCH) {
-                            continue;
-                        }
-                        int next = ny * PATCH + nx;
-                        if (mask[next] && labels[next] < 0) {
-                            labels[next] = label;
-                            queue[tail++] = next;
-                        }
-                    }
-                }
-            }
-            boolean touchesEdge = minX <= 1 || minY <= 1 || maxX >= PATCH - 2;
-            if (area >= 60) {
-                double cx = sumX / area;
-                double cy = sumY / area;
-                double score = area / (1.0 + ((cx - center) * (cx - center)
-                        + (cy - center) * (cy - center)) / 250.0);
-                if (!touchesEdge) {
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestLabel = label;
-                    }
-                } else if (score > edgeScore) {
-                    edgeScore = score;
-                    edgeLabel = label;
-                }
-            }
-            label++;
-        }
-        if (bestLabel < 0) {
-            bestLabel = edgeLabel;
-        }
-        if (bestLabel < 0) {
-            return mask.clone();
-        }
-        boolean[] out = new boolean[mask.length];
-        for (int i = 0; i < mask.length; i++) {
-            out[i] = labels[i] == bestLabel;
-        }
-        return out;
-    }
-
-    private double[] edgeMap(double[] luminance) {
-        int n = (int) Math.sqrt(luminance.length);
-        double[] equalized = equalizeHistogram(luminance);
-        double[] gx = new double[luminance.length];
-        double[] gy = new double[luminance.length];
-        for (int y = 1; y < n - 1; y++) {
-            for (int x = 1; x < n - 1; x++) {
-                int i = y * n + x;
-                gx[i] = equalized[i + 1] - equalized[i - 1];
-                gy[i] = equalized[i + n] - equalized[i - n];
-            }
-        }
-        double[] edge = new double[luminance.length];
-        double[] kernel = {1, 4, 6, 4, 1};
-        for (int y = 2; y < n - 2; y++) {
-            for (int x = 2; x < n - 2; x++) {
-                double sum = 0;
-                double weight = 0;
-                for (int ky = -2; ky <= 2; ky++) {
-                    for (int kx = -2; kx <= 2; kx++) {
-                        double w = kernel[ky + 2] * kernel[kx + 2];
-                        int i = (y + ky) * n + (x + kx);
-                        sum += Math.hypot(gx[i], gy[i]) * w;
-                        weight += w;
-                    }
-                }
-                edge[y * n + x] = sum / weight;
-            }
-        }
-        double max = 0;
-        for (int y = 10; y < n - 10; y++) {
-            for (int x = 10; x < n - 10; x++) {
-                max = Math.max(max, edge[y * n + x]);
-            }
-        }
-        if (max < 1e-9) {
-            return new double[NORMALIZED * NORMALIZED];
-        }
-        double[] out = new double[NORMALIZED * NORMALIZED];
-        int span = n - 20;
-        for (int y = 0; y < NORMALIZED; y++) {
-            int sy = 10 + (int) Math.round(y * (span - 1.0) / (NORMALIZED - 1.0));
-            for (int x = 0; x < NORMALIZED; x++) {
-                int sx = 10 + (int) Math.round(x * (span - 1.0) / (NORMALIZED - 1.0));
-                out[y * NORMALIZED + x] = edge[sy * n + sx] / max;
-            }
-        }
-        return out;
-    }
-
-    private double[] equalizeHistogram(double[] values) {
-        int[] histogram = new int[256];
-        for (double value : values) {
-            int bin = (int) Math.max(0, Math.min(255, Math.round(value)));
-            histogram[bin]++;
-        }
-        int[] cdf = new int[256];
-        int cumulative = 0;
-        for (int i = 0; i < 256; i++) {
-            cumulative += histogram[i];
-            cdf[i] = cumulative;
-        }
-        int total = values.length;
-        int cdfMin = 0;
-        for (int value : cdf) {
-            if (value > 0) {
-                cdfMin = value;
-                break;
-            }
-        }
-        double[] mapping = new double[256];
-        for (int i = 0; i < 256; i++) {
-            mapping[i] = total == cdfMin ? i : 255.0 * (cdf[i] - cdfMin) / (total - cdfMin);
-        }
-        double[] out = new double[values.length];
-        for (int i = 0; i < values.length; i++) {
-            int bin = (int) Math.max(0, Math.min(255, Math.round(values[i])));
-            out[i] = mapping[bin];
-        }
-        return out;
-    }
-
-    private double median(double[] values) {
-        double[] copy = values.clone();
-        java.util.Arrays.sort(copy);
-        int middle = copy.length / 2;
-        return copy.length % 2 == 0 ? (copy[middle - 1] + copy[middle]) / 2.0 : copy[middle];
     }
 }

@@ -1,0 +1,31 @@
+mse_rgba 8960 8294 0.9256696428571428 89 140
+  (None, ('white', 'rook')) 218
+  (None, ('white', 'bishop')) 106
+  (None, ('black', 'rook')) 45
+  (None, ('black', 'king')) 42
+  (('white', 'pawn'), ('black', 'rook')) 32
+  (None, ('black', 'bishop')) 27
+  (('white', 'pawn'), ('white', 'bishop')) 20
+  (('white', 'pawn'), ('black', 'bishop')) 19
+  (None, ('white', 'pawn')) 15
+  (None, ('white', 'king')) 15
+  (('white', 'pawn'), ('black', 'queen')) 14
+  (('black', 'pawn'), ('black', 'rook')) 14
+  (None, ('black', 'pawn')) 14
+  (('white', 'knight'), ('black', 'rook')) 11
+  (('white', 'pawn'), None) 10
+  (('white', 'rook'), ('black', 'queen')) 8
+  (('white', 'bishop'), ('black', 'rook')) 7
+  (('white', 'bishop'), ('black', 'bishop')) 6
+  (('black', 'knight'), None) 5
+  (('white', 'knight'), ('black', 'queen')) 5
+  ('puzzle_0002', 'rustic-3d', 45, 'r1bqkb1r/1p1ppp1p/2p1n2n/p5p1/2N1P3/N2P1P1P/PPPK2P1/R1BQ1B1R w kq - 1 10', 'dataset/puzzles/puzzle_0002.jpg')
+  ('puzzle_0009', 'denim-flat', 62, '2k2bnr/rQ2pn2/4P1p1/p1p5/2b5/pP1P3p/P1K5/R4B2 b - - 5 40', 'dataset/puzzles/puzzle_0009.jpg')
+  ('puzzle_0010', 'marble-bw-flat', 49, 'rnb1kbnr/1p1p1ppp/p7/2p1p3/1P1P1B2/N1P3q1/P3PPPP/R2QKBNR b KQkq - 5 6', 'dataset/puzzles/puzzle_0010.jpg')
+  ('puzzle_0011', 'marble-3d', 62, 'rn1q1b1r/p1p1pkp1/5n1p/5b2/1pp1pPP1/5QN1/PP1P2BP/RNB2K1R b - - 2 13', 'dataset/puzzles/puzzle_0011.jpg')
+  ('puzzle_0012', 'denim-3d', 36, 'r1b2knr/pp1p2b1/n7/2pPpppp/1PP2P2/8/RPQ1P1PP/1NBK1BNR w - - 4 16', 'dataset/puzzles/puzzle_0012.jpg')
+  ('puzzle_0014', 'plaid-3d', 48, 'r4bnr/3npp2/b1p5/p3k2p/P3Pq1P/RP1P1N1B/8/1NBK3R b - - 0 31', 'dataset/puzzles/puzzle_0014.jpg')
+  ('puzzle_0015', 'wood-3d', 42, 'r1bqkbr1/1pp1pppp/2np4/p7/8/NP5P/P1PnPK2/R1BQ1BNR w q - 0 10', 'dataset/puzzles/puzzle_0015.jpg')
+  ('puzzle_0016', 'mahogany-3d', 50, '1rb2br1/npp2kp1/3p1p2/1p1p2Bp/nPP1PQ1P/P1N3q1/5P1R/R3K3 w Q - 0 25', 'dataset/puzzles/puzzle_0016.jpg')
+  ('puzzle_0026', 'denim-flat', 58, '3k1b1r/3bppp1/4p2n/P1p3Pp/q2n1P1P/1R1r4/4P1B1/1QB1K2R b K - 6 27', 'dataset/puzzles/puzzle_0026.jpg')
+  ('puzzle_0029', 'denim-3d', 34, 'r1b1k1nr/2ppbppp/1pn1p3/p7/2PqP1PQ/N4P2/PP2B2P/R1B1K1NR b KQkq - 0 11', 'dataset/puzzles/puzzle_0029.jpg')

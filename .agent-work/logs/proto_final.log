@@ -1,0 +1,29 @@
+FINAL piece 0.995253164556962 exact 149 / 158 wrongtheme 0
+  (('white', 'pawn'), ('white', 'king')) 11
+  (('black', 'pawn'), ('black', 'king')) 9
+  (('black', 'pawn'), ('black', 'queen')) 4
+  (('white', 'pawn'), ('black', 'king')) 4
+  (('white', 'pawn'), ('white', 'queen')) 3
+  (('black', 'knight'), ('black', 'queen')) 2
+  (('white', 'pawn'), ('white', 'knight')) 2
+  (('black', 'knight'), ('black', 'king')) 2
+  (('black', 'pawn'), ('white', 'bishop')) 1
+  (None, ('white', 'rook')) 1
+  (('black', 'pawn'), ('black', 'rook')) 1
+  (('black', 'pawn'), ('black', 'bishop')) 1
+  (('white', 'pawn'), ('white', 'rook')) 1
+  (('white', 'knight'), ('white', 'queen')) 1
+  (('black', 'bishop'), ('black', 'king')) 1
+  (('black', 'bishop'), ('black', 'pawn')) 1
+  (('black', 'knight'), ('black', 'pawn')) 1
+  (('black', 'rook'), ('black', 'pawn')) 1
+  (('black', 'bishop'), ('black', 'queen')) 1
+ fail ('19-55-03-334', 'rustic-3d', 'rustic-3d', 60)
+ fail ('19-55-18-000', 'wood-flat', 'wood-flat', 61)
+ fail ('20-02-15-954', 'classic-flat', 'classic-flat', 61)
+ fail ('20-02-42-284', 'marble-bw-flat', 'marble-bw-flat', 56)
+ fail ('20-02-47-190', 'marble-3d', 'marble-3d', 52)
+ fail ('20-02-53-590', 'denim-3d', 'denim-3d', 57)
+ fail ('20-03-02-796', 'wood-3d', 'wood-3d', 57)
+ fail ('20-03-05-802', 'mahogany-3d', 'mahogany-3d', 61)
+ fail ('20-03-09-608', 'oak-3d', 'oak-3d', 63)

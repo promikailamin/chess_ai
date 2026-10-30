@@ -1,0 +1,61 @@
+19-54-31-538 woodland-3d 64 /64
+19-55-03-334 rustic-3d 60 /64
+  err ('black', 'pawn') ('black', 'queen') 0.96 0.44 0.9
+  err ('black', 'pawn') ('white', 'bishop') 0.19 0.11 0.76
+  err None ('black', 'queen') 0.08 0.1 0.82
+  err None ('white', 'bishop') 0.14 0.09 0.79
+19-55-18-000 wood-flat 61 /64
+  err ('black', 'pawn') ('black', 'rook') 0.21 0.13 0.79
+  err None ('white', 'pawn') 1.0 0.81 0.81
+  err None ('black', 'queen') 1.0 0.8 0.81
+20-02-09-026 walnut-flat 64 /64
+20-02-12-688 teal-flat 64 /64
+20-02-15-954 classic-flat 64 /64
+20-02-19-616 plaid-flat 64 /64
+20-02-26-845 marble-flat 64 /64
+20-02-34-601 denim-flat 64 /64
+20-02-42-284 marble-bw-flat 60 /64
+  err ('white', 'pawn') ('black', 'king') 0.44 0.21 0.76
+  err ('white', 'pawn') ('black', 'king') 0.44 0.21 0.76
+  err ('white', 'pawn') ('black', 'king') 0.44 0.21 0.76
+  err ('white', 'pawn') ('black', 'king') 0.44 0.21 0.76
+20-02-47-190 marble-3d 53 /64
+  err ('black', 'knight') ('black', 'queen') 1.0 0.76 0.88
+  err ('black', 'pawn') ('black', 'king') 0.79 0.5 0.75
+  err ('black', 'pawn') ('black', 'queen') 0.21 0.22 0.86
+  err ('black', 'pawn') ('black', 'king') 0.92 0.41 0.8
+  err ('black', 'pawn') ('black', 'bishop') 0.39 0.15 0.88
+  err None ('white', 'bishop') 1.0 0.83 0.69
+  err ('white', 'pawn') ('white', 'queen') 0.97 0.81 0.83
+  err ('white', 'pawn') ('white', 'king') 0.96 0.82 0.77
+  err ('white', 'pawn') ('white', 'king') 0.83 0.45 0.81
+  err ('white', 'pawn') ('white', 'rook') 0.94 0.4 0.87
+  err ('white', 'pawn') ('white', 'knight') 0.92 0.41 0.82
+20-02-53-590 denim-3d 57 /64
+  err ('black', 'rook') ('black', 'queen') 0.96 0.47 0.84
+  err ('black', 'bishop') ('black', 'pawn') 0.97 0.41 0.8
+  err ('black', 'knight') ('black', 'king') 0.97 0.47 0.87
+  err ('black', 'pawn') ('black', 'king') 0.98 0.4 0.82
+  err ('black', 'pawn') ('black', 'king') 0.99 0.39 0.85
+  err ('black', 'pawn') ('black', 'king') 0.98 0.39 0.86
+  err ('black', 'pawn') ('black', 'king') 0.98 0.4 0.86
+20-02-56-786 ocean-3d 64 /64
+20-02-59-897 plaid-3d 64 /64
+20-03-02-796 wood-3d 57 /64
+  err ('black', 'rook') ('black', 'queen') 1.0 0.79 0.84
+  err ('black', 'bishop') ('black', 'pawn') 0.96 0.41 0.81
+  err ('black', 'knight') ('black', 'king') 0.96 0.47 0.87
+  err ('black', 'pawn') ('black', 'king') 0.98 0.39 0.85
+  err ('black', 'pawn') ('black', 'king') 0.97 0.39 0.86
+  err ('black', 'pawn') ('black', 'king') 0.97 0.41 0.86
+  err ('white', 'pawn') ('white', 'knight') 0.9 0.41 0.76
+20-03-05-802 mahogany-3d 63 /64
+  err ('black', 'knight') ('black', 'pawn') 0.71 0.41 0.93
+20-03-09-608 oak-3d 64 /64
+total 1051 / 1088
+ISSUE 59 /64
+  err ('black', 'queen') ('black', 'rook') 0.96 0.47 0.73
+  err ('black', 'bishop') ('black', 'rook') 0.87 0.37 0.75
+  err None ('black', 'rook') 0.23 0.08 0.79
+  err None ('white', 'rook') 0.76 0.55 0.75
+  err ('white', 'queen') ('white', 'bishop') 1.0 0.68 0.74

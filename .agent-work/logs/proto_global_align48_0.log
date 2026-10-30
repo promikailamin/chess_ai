@@ -1,0 +1,42 @@
+align size 48 search 0 piece 0.9241495253164557 exact 24 / 158
+theme confusions [(('rustic-3d', 'woodland-3d'), 92), (('oak-3d', 'plaid-3d'), 80), (('marble-flat', 'walnut-flat'), 74), (('wood-flat', 'walnut-flat'), 52), (('marble-bw-flat', 'teal-flat'), 52), (('denim-3d', 'wood-3d'), 52), (('rustic-3d', 'oak-3d'), 45), (('teal-flat', 'marble-3d'), 45), (('plaid-flat', 'marble-3d'), 45), (('ocean-3d', 'rustic-3d'), 44)]
+  (('white', 'pawn'), ('white', 'king')) 112
+  (('white', 'pawn'), ('black', 'rook')) 94
+  (('black', 'pawn'), ('black', 'knight')) 37
+  (('black', 'rook'), ('black', 'pawn')) 28
+  (('black', 'bishop'), ('black', 'rook')) 28
+  (('white', 'bishop'), ('black', 'rook')) 23
+  (('white', 'pawn'), ('white', 'bishop')) 20
+  (('white', 'bishop'), ('white', 'knight')) 19
+  (('white', 'rook'), ('white', 'bishop')) 18
+  (('black', 'pawn'), ('black', 'rook')) 17
+  (('black', 'knight'), ('black', 'pawn')) 16
+  (('black', 'rook'), None) 16
+  (('white', 'bishop'), ('white', 'king')) 15
+  (('black', 'queen'), ('black', 'pawn')) 14
+  (('white', 'knight'), ('white', 'rook')) 14
+  (('black', 'bishop'), ('white', 'rook')) 14
+  (('black', 'bishop'), ('black', 'pawn')) 14
+  (('white', 'pawn'), ('white', 'rook')) 14
+  (('white', 'pawn'), ('white', 'queen')) 13
+  (('white', 'pawn'), ('white', 'knight')) 13
+ fail ('puzzle_0001', 'woodland-3d', 63)
+ fail ('puzzle_0002', 'rustic-3d', 61)
+ fail ('puzzle_0003', 'wood-flat', 59)
+ fail ('puzzle_0005', 'teal-flat', 56)
+ fail ('puzzle_0006', 'classic-flat', 48)
+ fail ('puzzle_0007', 'plaid-flat', 53)
+ fail ('puzzle_0008', 'marble-flat', 53)
+ fail ('puzzle_0010', 'marble-bw-flat', 54)
+ fail ('puzzle_0011', 'marble-3d', 58)
+ fail ('puzzle_0012', 'denim-3d', 58)
+ fail ('puzzle_0013', 'ocean-3d', 61)
+ fail ('puzzle_0015', 'wood-3d', 58)
+ fail ('puzzle_0016', 'mahogany-3d', 63)
+ fail ('puzzle_0017', 'oak-3d', 63)
+ fail ('puzzle_0018', 'woodland-3d', 62)
+ fail ('puzzle_0019', 'rustic-3d', 61)
+ fail ('puzzle_0020', 'wood-flat', 59)
+ fail ('puzzle_0021', 'walnut-flat', 61)
+ fail ('puzzle_0022', 'teal-flat', 60)
+ fail ('puzzle_0023', 'classic-flat', 49)

@@ -1,0 +1,89 @@
+Image       : /home/runner/work/chess_ai/chess_ai/screenshots/Screenshot_2026-10-29-20-02-09-026_com.llx.chess.jpg
+grid V: 281.0/0/45 328.0/0/65 376.0/0/89 423.0/0/96 470.0/0/89 518.0/0/100 565.0/0/104 612.0/0/59 660.0/0/51
+grid H: 13.5/87/39 60.0/90/125 107.0/90/105 155.0/90/70 202.0/90/166 249.0/90/88 297.0/90/90 344.0/90/92 391.0/90/65
+grid-fit=(282,15) -> (661,10) -> (661,392) -> (282,391) score=0.523
+theme-score marble-flat=0.755 (32 cells)
+theme-score walnut-flat=0.877 (32 cells)
+theme-score marble-3d=0.792 (32 cells)
+theme-score wood-flat=0.792 (32 cells)
+theme-score marble-bw-flat=0.796 (32 cells)
+cell r0 c0 area=0.483 core=1.000 lr=1.000 theme=walnut-flat match=rook score=0.837 iou=0.805 occ=true
+cell r0 c1 area=0.477 core=1.000 lr=1.000 theme=walnut-flat match=knight score=0.870 iou=0.886 occ=true
+cell r0 c2 area=0.353 core=1.000 lr=1.000 theme=walnut-flat match=bishop score=0.865 iou=0.893 occ=true
+cell r0 c3 area=0.463 core=1.000 lr=1.000 theme=walnut-flat match=queen score=0.913 iou=0.936 occ=true
+cell r0 c4 area=0.454 core=1.000 lr=1.000 theme=walnut-flat match=king score=0.902 iou=0.910 occ=true
+cell r0 c5 area=0.354 core=1.000 lr=1.000 theme=walnut-flat match=bishop score=0.869 iou=0.896 occ=true
+cell r0 c6 area=0.458 core=1.000 lr=1.000 theme=walnut-flat match=knight score=0.881 iou=0.876 occ=true
+cell r0 c7 area=0.446 core=1.000 lr=1.000 theme=walnut-flat match=rook score=0.824 iou=0.723 occ=true
+cell r1 c0 area=0.287 core=0.994 lr=1.000 theme=walnut-flat match=pawn score=0.899 iou=0.917 occ=true
+cell r1 c1 area=0.281 core=0.980 lr=1.000 theme=walnut-flat match=pawn score=0.918 iou=0.907 occ=true
+cell r1 c2 area=0.284 core=0.967 lr=1.000 theme=walnut-flat match=pawn score=0.890 iou=0.899 occ=true
+cell r1 c3 area=0.277 core=0.962 lr=1.000 theme=walnut-flat match=pawn score=0.910 iou=0.905 occ=true
+cell r1 c4 area=0.280 core=0.967 lr=1.000 theme=walnut-flat match=pawn score=0.897 iou=0.890 occ=true
+cell r1 c5 area=0.273 core=0.971 lr=1.000 theme=walnut-flat match=pawn score=0.911 iou=0.905 occ=true
+cell r1 c6 area=0.274 core=0.983 lr=1.000 theme=walnut-flat match=pawn score=0.921 iou=0.890 occ=true
+cell r1 c7 area=0.270 core=0.992 lr=1.000 theme=walnut-flat match=pawn score=0.919 iou=0.905 occ=true
+cell r2 c0 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c1 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c2 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c3 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c4 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c5 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c6 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r2 c7 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c0 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c1 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c2 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c3 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c4 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c5 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c6 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r3 c7 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c0 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c1 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c2 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c3 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c4 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c5 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c6 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r4 c7 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c0 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c1 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c2 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c3 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c4 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c5 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c6 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r5 c7 area=0.000 core=0.000 lr=0.000 theme=walnut-flat match=- score=0.000 iou=0.000 occ=false
+cell r6 c0 area=0.288 core=0.982 lr=1.000 theme=walnut-flat match=pawn score=0.918 iou=0.929 occ=true
+cell r6 c1 area=0.272 core=0.952 lr=1.000 theme=walnut-flat match=pawn score=0.937 iou=0.935 occ=true
+cell r6 c2 area=0.284 core=0.940 lr=1.000 theme=walnut-flat match=pawn score=0.921 iou=0.937 occ=true
+cell r6 c3 area=0.269 core=0.907 lr=1.000 theme=walnut-flat match=pawn score=0.917 iou=0.927 occ=true
+cell r6 c4 area=0.282 core=0.931 lr=1.000 theme=walnut-flat match=pawn score=0.904 iou=0.928 occ=true
+cell r6 c5 area=0.266 core=0.926 lr=1.000 theme=walnut-flat match=pawn score=0.935 iou=0.937 occ=true
+cell r6 c6 area=0.280 core=0.963 lr=1.000 theme=walnut-flat match=pawn score=0.948 iou=0.932 occ=true
+cell r6 c7 area=0.263 core=0.946 lr=1.000 theme=walnut-flat match=pawn score=0.937 iou=0.924 occ=true
+cell r7 c0 area=0.461 core=1.000 lr=1.000 theme=walnut-flat match=rook score=0.834 iou=0.748 occ=true
+cell r7 c1 area=0.502 core=1.000 lr=1.000 theme=walnut-flat match=knight score=0.847 iou=0.799 occ=true
+cell r7 c2 area=0.347 core=1.000 lr=1.000 theme=walnut-flat match=bishop score=0.776 iou=0.678 occ=true
+cell r7 c3 area=0.508 core=1.000 lr=1.000 theme=walnut-flat match=queen score=0.806 iou=0.851 occ=true
+cell r7 c4 area=0.438 core=0.987 lr=1.000 theme=walnut-flat match=king score=0.796 iou=0.746 occ=true
+cell r7 c5 area=0.401 core=1.000 lr=1.000 theme=walnut-flat match=rook score=0.753 iou=0.639 occ=true
+cell r7 c6 area=0.439 core=1.000 lr=1.000 theme=walnut-flat match=knight score=0.837 iou=0.711 occ=true
+cell r7 c7 area=0.492 core=1.000 lr=1.000 theme=walnut-flat match=rook score=0.786 iou=0.790 occ=true
+theme=walnut-flat
+Board       : (751,40) -> (1762,26) -> (1761,1045) -> (752,1042)  via hough-grid  (checkerboard 0.523)
+Confidence  : 0.877
+Recognized board:
+8  r n b q k b n r 
+7  p p p p p p p p 
+6  . . . . . . . . 
+5  . . . . . . . . 
+4  . . . . . . . . 
+3  . . . . . . . . 
+2  P P P P P P P P 
+1  R N B Q K R N R 
+
+   a b c d e f g h
+
+FEN         : rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKRNR w KQkq - 0 1

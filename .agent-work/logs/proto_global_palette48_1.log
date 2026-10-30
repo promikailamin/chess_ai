@@ -1,0 +1,37 @@
+palette topk 1 size 48 piece 0.9801226265822784 exact 118 / 158 topkmiss 24
+theme confusions [(('oak-3d', 'plaid-3d'), 200), (('woodland-3d', 'rustic-3d'), 145), (('plaid-3d', 'oak-3d'), 83), (('walnut-flat', 'plaid-flat'), 56), (('marble-flat', 'ocean-3d'), 32), (('denim-flat', 'classic-flat'), 32), (('marble-3d', 'wood-3d'), 31), (('marble-3d', 'woodland-3d'), 29), (('rustic-3d', 'woodland-3d'), 28), (('marble-bw-flat', 'marble-3d'), 27)]
+  (('black', 'rook'), None) 16
+  (('white', 'pawn'), ('white', 'king')) 15
+  (('black', 'rook'), ('black', 'pawn')) 9
+  (('white', 'pawn'), ('white', 'rook')) 9
+  (('black', 'pawn'), ('black', 'king')) 9
+  (('black', 'king'), ('black', 'pawn')) 8
+  (('black', 'pawn'), ('black', 'bishop')) 7
+  (('white', 'pawn'), ('white', 'bishop')) 7
+  (('black', 'bishop'), ('black', 'pawn')) 6
+  (('white', 'pawn'), ('white', 'knight')) 6
+  (('black', 'pawn'), ('black', 'rook')) 6
+  (('black', 'pawn'), ('white', 'rook')) 6
+  (('white', 'pawn'), ('black', 'rook')) 6
+  (('black', 'knight'), ('black', 'pawn')) 5
+  (('black', 'king'), ('black', 'queen')) 4
+  (('white', 'rook'), ('white', 'bishop')) 4
+  (('black', 'knight'), ('black', 'king')) 4
+  (('black', 'pawn'), ('black', 'queen')) 4
+  (('white', 'pawn'), ('black', 'king')) 4
+  (('black', 'bishop'), ('black', 'rook')) 3
+ fail ('puzzle_0011', 'marble-3d', 49)
+ fail ('puzzle_0012', 'denim-3d', 63)
+ fail ('puzzle_0013', 'ocean-3d', 63)
+ fail ('puzzle_0017', 'oak-3d', 63)
+ fail ('puzzle_0018', 'woodland-3d', 62)
+ fail ('puzzle_0028', 'marble-3d', 62)
+ fail ('puzzle_0029', 'denim-3d', 63)
+ fail ('puzzle_0032', 'wood-3d', 63)
+ fail ('puzzle_0042', 'marble-flat', 35)
+ fail ('puzzle_0049', 'wood-3d', 63)
+ fail ('puzzle_0056', 'teal-flat', 42)
+ fail ('puzzle_0062', 'marble-3d', 63)
+ fail ('puzzle_0063', 'denim-3d', 62)
+ fail ('puzzle_0065', 'plaid-3d', 62)
+ fail ('puzzle_0069', 'woodland-3d', 62)

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.chessai.vision.GrayImage;
+import com.chessai.vision.RgbImage;
 import com.chessai.vision.TemplateSource;
 
 import java.io.BufferedReader;
@@ -43,6 +44,25 @@ final class AssetTemplateSource implements TemplateSource {
                 gray[i] = (int) Math.round(0.299 * r + 0.587 * g + 0.114 * b);
             }
             return new GrayImage(width, height, gray);
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    public RgbImage rgbImage(String resourcePath) {
+        String path = normalize(resourcePath);
+        try (InputStream stream = assets.open(path)) {
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            if (bitmap == null) {
+                return null;
+            }
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int[] pixels = new int[width * height];
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+            bitmap.recycle();
+            return new RgbImage(width, height, pixels);
         } catch (IOException ex) {
             return null;
         }

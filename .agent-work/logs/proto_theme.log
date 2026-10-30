@@ -1,0 +1,13 @@
+MISS puzzle_0011 exp marble-3d got woodland-3d {'woodland-3d': np.float32(20.2), 'wood-3d': np.float32(20.9), 'marble-3d': np.float32(21.1)}
+MISS puzzle_0017 exp oak-3d got plaid-3d {'plaid-3d': np.float32(7.6), 'oak-3d': np.float32(11.2), 'woodland-3d': np.float32(13.2)}
+MISS puzzle_0018 exp woodland-3d got rustic-3d {'rustic-3d': np.float32(8.0), 'woodland-3d': np.float32(10.4), 'oak-3d': np.float32(18.5)}
+MISS puzzle_0021 exp walnut-flat got plaid-flat {'plaid-flat': np.float32(16.3), 'walnut-flat': np.float32(18.6), 'oak-3d': np.float32(36.4)}
+MISS puzzle_0031 exp plaid-3d got oak-3d {'oak-3d': np.float32(10.0), 'plaid-3d': np.float32(10.9), 'rustic-3d': np.float32(15.0)}
+MISS puzzle_0042 exp marble-flat got ocean-3d {'ocean-3d': np.float32(29.3), 'marble-flat': np.float32(31.5), 'marble-3d': np.float32(35.5)}
+MISS puzzle_0051 exp oak-3d got plaid-3d {'plaid-3d': np.float32(11.9), 'oak-3d': np.float32(13.8), 'woodland-3d': np.float32(14.8)}
+MISS puzzle_0056 exp teal-flat got wood-3d {'wood-3d': np.float32(18.9), 'teal-flat': np.float32(19.2), 'marble-3d': np.float32(20.2)}
+MISS 19-54-31-538 exp woodland-3d got rustic-3d {'rustic-3d': np.float32(10.1), 'woodland-3d': np.float32(11.2), 'plaid-3d': np.float32(19.3)}
+MISS 20-02-34-601 exp denim-flat got classic-flat {'classic-flat': np.float32(14.8), 'denim-flat': np.float32(15.9), 'rustic-3d': np.float32(27.2)}
+MISS 20-02-59-897 exp plaid-3d got oak-3d {'oak-3d': np.float32(9.3), 'plaid-3d': np.float32(9.5), 'woodland-3d': np.float32(14.8)}
+MISS 20-03-09-608 exp oak-3d got plaid-3d {'plaid-3d': np.float32(9.4), 'oak-3d': np.float32(11.1), 'woodland-3d': np.float32(12.4)}
+theme accuracy 66 / 78

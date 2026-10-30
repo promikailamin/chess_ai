@@ -1,0 +1,3 @@
+corners BEST (8953, 0.02, 0.02, 0.99921875, 134)
+  (('white', 'rook'), ('black', 'bishop')) 5
+  (('black', 'rook'), None) 2

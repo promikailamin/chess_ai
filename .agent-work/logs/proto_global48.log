@@ -1,0 +1,32 @@
+global size 48 piece 0.9937697784810127 exact 130 / 158
+theme confusions [(('walnut-flat', 'plaid-flat'), 20), (('marble-3d', 'mahogany-3d'), 18), (('teal-flat', 'classic-flat'), 13), (('classic-flat', 'marble-bw-flat'), 11), (('denim-flat', 'marble-bw-flat'), 11), (('plaid-flat', 'walnut-flat'), 6), (('classic-flat', 'teal-flat'), 5), (('denim-flat', 'classic-flat'), 5), (('marble-bw-flat', 'marble-flat'), 5), (('marble-bw-flat', 'walnut-flat'), 5)]
+  (('black', 'rook'), None) 16
+  (('black', 'knight'), ('black', 'pawn')) 9
+  (('white', 'rook'), ('black', 'pawn')) 6
+  (('black', 'pawn'), ('black', 'rook')) 6
+  (('black', 'pawn'), None) 3
+  (('white', 'queen'), ('black', 'bishop')) 2
+  (('black', 'pawn'), ('black', 'king')) 2
+  (('black', 'knight'), ('black', 'rook')) 2
+  (('black', 'pawn'), ('black', 'bishop')) 2
+  (('white', 'pawn'), ('white', 'queen')) 2
+  (('white', 'pawn'), ('white', 'king')) 2
+  (('black', 'rook'), ('black', 'queen')) 2
+  (('white', 'bishop'), None) 1
+  (('black', 'pawn'), ('white', 'knight')) 1
+  (None, ('white', 'king')) 1
+  (('black', 'bishop'), ('black', 'knight')) 1
+  (('white', 'knight'), ('white', 'queen')) 1
+  (('white', 'pawn'), ('white', 'knight')) 1
+  (('black', 'bishop'), ('white', 'rook')) 1
+  (('black', 'queen'), ('black', 'rook')) 1
+ fail ('puzzle_0011', 'marble-3d', 60)
+ fail ('puzzle_0012', 'denim-3d', 63)
+ fail ('puzzle_0013', 'ocean-3d', 63)
+ fail ('puzzle_0027', 'marble-bw-flat', 63)
+ fail ('puzzle_0028', 'marble-3d', 61)
+ fail ('puzzle_0029', 'denim-3d', 63)
+ fail ('puzzle_0032', 'wood-3d', 63)
+ fail ('puzzle_0049', 'wood-3d', 63)
+ fail ('puzzle_0062', 'marble-3d', 63)
+ fail ('puzzle_0063', 'denim-3d', 62)

@@ -1,0 +1,13 @@
+BEST (7963, -0.02, 0.0, 0.0, 0.8887276785714285, 49)
+  (('white', 'pawn'), None) 391
+  (('black', 'pawn'), None) 247
+  (('white', 'bishop'), None) 52
+  (('white', 'rook'), None) 50
+  (('white', 'knight'), None) 45
+  (('black', 'bishop'), None) 36
+  (('black', 'queen'), None) 35
+  (('black', 'rook'), None) 34
+  (('black', 'knight'), None) 33
+  (('white', 'queen'), None) 32
+  (('white', 'king'), None) 23
+  (('black', 'king'), None) 19

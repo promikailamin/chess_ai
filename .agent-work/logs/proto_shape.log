@@ -1,0 +1,21 @@
+shape 0.78359375 0 / 140
+  (('black', 'pawn'), ('black', 'king')) 150
+  (('white', 'pawn'), ('white', 'knight')) 122
+  (('black', 'pawn'), ('black', 'queen')) 105
+  (('white', 'pawn'), ('white', 'king')) 90
+  (('white', 'pawn'), ('black', 'queen')) 83
+  (('black', 'bishop'), ('black', 'pawn')) 77
+  (('black', 'pawn'), ('black', 'knight')) 76
+  (('white', 'bishop'), ('white', 'pawn')) 65
+  (('white', 'pawn'), ('white', 'rook')) 61
+  (('white', 'rook'), ('white', 'pawn')) 52
+  (('black', 'knight'), ('black', 'king')) 50
+  (('black', 'rook'), ('black', 'pawn')) 42
+  (('black', 'rook'), ('black', 'bishop')) 42
+  (('black', 'bishop'), ('black', 'king')) 41
+  (('white', 'bishop'), ('black', 'queen')) 37
+  (('black', 'rook'), ('black', 'king')) 35
+  (('white', 'rook'), ('white', 'knight')) 33
+  (('white', 'queen'), ('white', 'pawn')) 30
+  (('white', 'knight'), ('black', 'king')) 30
+  (('black', 'knight'), ('black', 'rook')) 26

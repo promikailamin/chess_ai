@@ -10,6 +10,11 @@ public interface TemplateSource {
     /** Returns the image at {@code resourcePath}, or {@code null} if unavailable. */
     GrayImage image(String resourcePath);
 
+    /** Returns the color image at {@code resourcePath}, or {@code null} if unavailable. */
+    default RgbImage rgbImage(String resourcePath) {
+        return null;
+    }
+
     /** Returns the UTF-8 text at {@code resourcePath}, or {@code null} if unavailable. */
     String text(String resourcePath);
 }

@@ -1,0 +1,57 @@
+ring BEST (8780, 0.02, 0.02, 0.9799107142857143, 117)
+  (('white', 'pawn'), ('black', 'rook')) 59
+  (('white', 'pawn'), ('black', 'queen')) 22
+  (('white', 'pawn'), ('white', 'bishop')) 20
+  (('white', 'knight'), ('black', 'rook')) 14
+  (('black', 'rook'), None) 9
+  (('white', 'rook'), ('black', 'queen')) 8
+  (('white', 'bishop'), ('black', 'bishop')) 7
+  (('white', 'bishop'), ('black', 'rook')) 6
+  (('black', 'pawn'), ('black', 'rook')) 5
+  (('white', 'knight'), ('black', 'queen')) 5
+  (('white', 'knight'), ('white', 'bishop')) 5
+  (('white', 'queen'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'rook')) 4
+  (('white', 'queen'), ('black', 'rook')) 3
+  (('white', 'bishop'), ('white', 'rook')) 2
+  (('white', 'rook'), ('black', 'rook')) 2
+  (('black', 'king'), ('black', 'rook')) 1
+corners BEST (8786, 0.02, 0.02, 0.9805803571428572, 118)
+  (('white', 'pawn'), ('black', 'rook')) 59
+  (('white', 'pawn'), ('black', 'queen')) 22
+  (('white', 'pawn'), ('white', 'bishop')) 20
+  (('white', 'knight'), ('black', 'rook')) 14
+  (('white', 'rook'), ('black', 'queen')) 8
+  (('white', 'bishop'), ('black', 'bishop')) 7
+  (('white', 'bishop'), ('black', 'rook')) 6
+  (('white', 'knight'), ('black', 'queen')) 5
+  (('white', 'knight'), ('white', 'bishop')) 5
+  (('white', 'queen'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'rook')) 4
+  (('black', 'pawn'), ('black', 'rook')) 3
+  (('white', 'queen'), ('black', 'rook')) 3
+  (('white', 'rook'), ('black', 'bishop')) 3
+  (('white', 'rook'), ('black', 'rook')) 2
+  (('white', 'bishop'), ('white', 'rook')) 2
+  (('black', 'rook'), None) 2
+  (('black', 'king'), ('black', 'rook')) 1
+border_median BEST (8784, 0.02, 0.02, 0.9803571428571428, 117)
+  (('white', 'pawn'), ('black', 'rook')) 59
+  (('white', 'pawn'), ('black', 'queen')) 22
+  (('white', 'pawn'), ('white', 'bishop')) 20
+  (('white', 'knight'), ('black', 'rook')) 14
+  (('black', 'rook'), None) 9
+  (('white', 'rook'), ('black', 'queen')) 8
+  (('white', 'bishop'), ('black', 'bishop')) 7
+  (('white', 'bishop'), ('black', 'rook')) 6
+  (('white', 'knight'), ('black', 'queen')) 5
+  (('white', 'knight'), ('white', 'bishop')) 5
+  (('white', 'queen'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'bishop')) 4
+  (('white', 'king'), ('black', 'rook')) 4
+  (('black', 'pawn'), ('black', 'rook')) 3
+  (('white', 'queen'), ('black', 'rook')) 3
+  (('white', 'bishop'), ('white', 'rook')) 2
+  (('black', 'king'), ('black', 'rook')) 1
